@@ -17,9 +17,12 @@ cd FairTix
 ```bash
 cp .env.example .env
 ```
- - Change the password
+ - Change the environment variables
 ```bash
-POSTGRES_PASSWORD=changeme
+POSTGRES_DB=changeme
+POSTGRES_USER: changeme
+POSTGRES_PASSWORD: changeme
+JWT_SECRET=superlongrandomsecuresecretkeythatnobodycommits
 ```
 
 To start:
