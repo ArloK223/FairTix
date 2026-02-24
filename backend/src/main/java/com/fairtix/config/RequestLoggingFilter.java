@@ -26,7 +26,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     String requestId = UUID.randomUUID().toString();
     long start = System.currentTimeMillis();
 
-    log.info("[{}] -> {} {}", requestId,
+    log.info("[{}] <- {} {}", requestId,
         request.getMethod(),
         request.getRequestURI());
 
@@ -34,7 +34,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     long duration = System.currentTimeMillis() - start;
 
-    log.info("[{}] <- {} ({} ms)", requestId,
+    log.info("[{}] -> {} ({} ms)", requestId,
         response.getStatus(),
         duration);
   }

@@ -1,7 +1,9 @@
 package com.fairtix.auth.application;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fairtix.users.domain.User;
 import com.fairtix.users.dto.LoginRequest;
@@ -25,7 +27,7 @@ public class AuthService {
 
   public String register(RegisterRequest request) {
     if (userRepository.findByEmail(request.email()).isPresent()) {
-      throw new RuntimeException("User already exists");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
     }
 
     User user = new User();
@@ -37,20 +39,20 @@ public class AuthService {
     return jwtService.generateToken(
         user.getId(),
         user.getEmail(),
-        user.getRole());
+        user.getRole().name());
   }
 
   public String login(LoginRequest request) {
     User user = userRepository.findByEmail(request.email())
-        .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-      throw new RuntimeException("Invalid credentials");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
     }
 
     return jwtService.generateToken(
         user.getId(),
         user.getEmail(),
-        user.getRole());
+        user.getRole().name());
   }
 }

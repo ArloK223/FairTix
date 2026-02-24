@@ -1,9 +1,13 @@
 package com.fairtix.users.domain;
 
+import com.fairtix.users.domain.Role;
+
 import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +27,8 @@ public class User {
   @Column(nullable = false)
   private String password;
 
-  private String role = "USER";
+  @Enumerated(EnumType.STRING)
+  private Role role = Role.USER;
 
   public UUID getId() {
     return id;
@@ -49,11 +54,11 @@ public class User {
     this.password = password;
   }
 
-  public String getRole() {
+  public Role getRole() {
     return role;
   }
 
-  public void setRole(String role) {
+  public void setRole(Role role) {
     this.role = role;
   }
 }
