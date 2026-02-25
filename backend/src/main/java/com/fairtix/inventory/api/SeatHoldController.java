@@ -5,6 +5,7 @@ import com.fairtix.inventory.dto.CreateHoldRequest;
 import com.fairtix.inventory.dto.SeatHoldResponse;
 
 import jakarta.annotation.security.PermitAll;
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,7 +36,7 @@ public class SeatHoldController {
   @ResponseStatus(HttpStatus.CREATED)
   public List<SeatHoldResponse> createHold(
       @PathVariable UUID eventId,
-      @RequestBody CreateHoldRequest request) {
+      @Valid @RequestBody CreateHoldRequest request) {
     return seatHoldService
         .createHold(eventId, request.seatIds(), request.holderId(), request.durationMinutes())
         .stream()
