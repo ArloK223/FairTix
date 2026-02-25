@@ -24,6 +24,8 @@ POSTGRES_USER: changeme
 POSTGRES_PASSWORD: changeme
 JWT_SECRET=superlongrandomsecuresecretkeythatnobodycommits
 ```
+> [!NOTE]
+> JWT_SECRET should be at least 64 characters long
 
 To start:
 ```
