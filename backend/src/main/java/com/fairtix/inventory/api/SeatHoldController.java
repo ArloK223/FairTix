@@ -1,6 +1,7 @@
 package com.fairtix.inventory.api;
 
 import com.fairtix.inventory.application.SeatHoldService;
+import com.fairtix.inventory.domain.HoldStatus;
 import com.fairtix.inventory.dto.CreateHoldRequest;
 import com.fairtix.inventory.dto.SeatHoldResponse;
 
@@ -45,6 +46,23 @@ public class SeatHoldController {
   }
 
   /**
+   * Lists holds for a given holder, optionally filtered by status.
+   *
+   * GET /api/holds?holderId=...&status=ACTIVE
+   *
+   * @return 200 OK with the matching holds (empty list if none)
+   */
+  @GetMapping("/api/holds")
+  public List<SeatHoldResponse> listHolds(
+      @RequestParam String holderId,
+      @RequestParam(defaultValue = "ACTIVE") HoldStatus status) {
+    return seatHoldService.listHolds(holderId, status)
+        .stream()
+        .map(SeatHoldResponse::from)
+        .toList();
+  }
+
+  /**
    * Returns hold details visible only to the original holder.
    *
    * GET /api/holds/{holdId}?holderId=...
@@ -61,6 +79,7 @@ public class SeatHoldController {
 
   /**
    * Releases an active hold, freeing the seat for others.
+   * Idempotent: calling release on an already-RELEASED hold returns 200.
    *
    * POST /api/holds/{holdId}/release?holderId=...
    *
@@ -76,6 +95,7 @@ public class SeatHoldController {
 
   /**
    * Confirms an active hold, transitioning the seat to BOOKED.
+   * Idempotent: calling confirm on an already-CONFIRMED hold returns 200.
    *
    * POST /api/holds/{holdId}/confirm?holderId=...
    *
