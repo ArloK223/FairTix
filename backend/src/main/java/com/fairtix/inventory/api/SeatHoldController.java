@@ -1,11 +1,10 @@
 package com.fairtix.inventory.api;
 
 import com.fairtix.inventory.application.SeatHoldService;
+import com.fairtix.inventory.domain.HoldStatus;
 import com.fairtix.inventory.dto.CreateHoldRequest;
 import com.fairtix.inventory.dto.SeatHoldResponse;
-
-import jakarta.annotation.security.PermitAll;
-
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +34,26 @@ public class SeatHoldController {
   @ResponseStatus(HttpStatus.CREATED)
   public List<SeatHoldResponse> createHold(
       @PathVariable UUID eventId,
-      @RequestBody CreateHoldRequest request) {
+      @Valid @RequestBody CreateHoldRequest request) {
     return seatHoldService
         .createHold(eventId, request.seatIds(), request.holderId(), request.durationMinutes())
+        .stream()
+        .map(SeatHoldResponse::from)
+        .toList();
+  }
+
+  /**
+   * Lists holds for a given holder, optionally filtered by status.
+   *
+   * GET /api/holds?holderId=...&status=ACTIVE
+   *
+   * @return 200 OK with the matching holds (empty list if none)
+   */
+  @GetMapping("/api/holds")
+  public List<SeatHoldResponse> listHolds(
+      @RequestParam String holderId,
+      @RequestParam(defaultValue = "ACTIVE") HoldStatus status) {
+    return seatHoldService.listHolds(holderId, status)
         .stream()
         .map(SeatHoldResponse::from)
         .toList();
@@ -60,6 +76,7 @@ public class SeatHoldController {
 
   /**
    * Releases an active hold, freeing the seat for others.
+   * Idempotent: calling release on an already-RELEASED hold returns 200.
    *
    * POST /api/holds/{holdId}/release?holderId=...
    *
@@ -75,6 +92,7 @@ public class SeatHoldController {
 
   /**
    * Confirms an active hold, transitioning the seat to BOOKED.
+   * Idempotent: calling confirm on an already-CONFIRMED hold returns 200.
    *
    * POST /api/holds/{holdId}/confirm?holderId=...
    *
