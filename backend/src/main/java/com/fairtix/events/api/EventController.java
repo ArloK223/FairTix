@@ -1,5 +1,7 @@
 package com.fairtix.events.api;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -7,10 +9,10 @@ import com.fairtix.events.application.EventService;
 import com.fairtix.events.domain.Event;
 import com.fairtix.events.dto.CreateEventRequest;
 import com.fairtix.events.dto.EventResponse;
+import com.sun.jdi.request.EventRequest;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -42,17 +44,20 @@ public class EventController {
   }
 
   /**
-   * Gets all events
+   * Takes page number and number of items per page and returns the requested page
+   * of events
    *
-   * @return a list of all events
+   * @param page the page number
+   * @param size the number of items per page
+   * @return the requested page
    */
   @PermitAll
   @GetMapping
-  public List<EventResponse> getAllEvents() {
-    return service.getAllEvents()
-        .stream()
-        .map(EventResponse::from)
-        .toList();
+  public Page<EventResponse> list(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    Page<Event> events = service.findAll(PageRequest.of(page, size));
+    return (Page<EventResponse>) events.map(EventResponse::from);
   }
 
   /**
