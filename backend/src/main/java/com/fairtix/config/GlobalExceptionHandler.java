@@ -13,7 +13,9 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * Translates domain and validation exceptions into a consistent JSON error body:
+ * Translates domain and validation exceptions into a consistent JSON error
+ * body:
+ * 
  * <pre>
  * {
  *   "status":    409,
@@ -45,14 +47,6 @@ public class GlobalExceptionHandler {
     return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), req);
   }
 
-  private ResponseEntity<Map<String, Object>> error(
-      HttpStatus status, String code, String message, HttpServletRequest req) {
-    return ResponseEntity.status(status).body(Map.of(
-        "status", status.value(),
-        "code", code,
-        "message", message != null ? message : "",
-        "path", req.getRequestURI(),
-        "timestamp", Instant.now().toString()));
   /**
    * Handles @Valid failures on request bodies.
    * Reports the first field error so clients know exactly what to fix.
@@ -69,14 +63,13 @@ public class GlobalExceptionHandler {
 
   // -------------------------------------------------------------------------
 
-  private ResponseEntity<Map<String, Object>> error(
-      HttpStatus status, String code, String message, HttpServletRequest req) {
+  private ResponseEntity<Map<String, Object>> error(HttpStatus status, String code, String message,
+      HttpServletRequest req) {
     return ResponseEntity.status(status).body(Map.of(
-        "status",    status.value(),
-        "code",      code,
-        "message",   message != null ? message : "",
-        "path",      req.getRequestURI(),
-        "timestamp", Instant.now().toString()
-    ));
+        "status", status.value(),
+        "code", code,
+        "message", message != null ? message : "",
+        "path", req.getRequestURI(),
+        "timestamp", Instant.now().toString()));
   }
 }

@@ -5,6 +5,8 @@ import com.fairtix.events.infrastructure.EventRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -42,6 +44,17 @@ public class EventService {
   public Event getEvent(UUID id) {
     return repository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+  }
+
+  /**
+   * Takes in the number of items per page and the page number and returns the
+   * requested page of events
+   *
+   * @param pageable the number of items per page and page number
+   * @return the requested page
+   */
+  public Page<Event> findAll(Pageable pageable) {
+    return repository.findAll(pageable);
   }
 
   /**
