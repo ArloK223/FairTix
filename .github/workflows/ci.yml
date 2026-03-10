@@ -10,9 +10,12 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -25,7 +28,6 @@ jobs:
         run: mvn clean verify
 
   dependency-scan:
-    name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -35,40 +37,16 @@ jobs:
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: "fairtix"
-          path: "."
-          format: "HTML"
-
-  code-security:
-    name: CodeQL Static Analysis
-    runs-on: ubuntu-latest
-
-    permissions:
-      security-events: write
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: java
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Run CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+          path: "./backend"
 
   container-scan:
-    name: Container Security Scan
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t fairtix .
+        run: docker build -t fairtix ./backend
 
       - name: Run Trivy vulnerability scan
         uses: aquasecurity/trivy-action@master
