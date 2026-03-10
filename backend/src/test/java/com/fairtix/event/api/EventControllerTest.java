@@ -180,7 +180,7 @@ class EventControllerTest {
 
   @Test
   @WithMockUser(roles = "ADMIN")
-  void deleteEvent_nonexistentEvent_returns400() throws Exception {
+  void deleteEvent_nonexistentEvent_returns404() throws Exception {
 
     mockMvc.perform(delete(EVENT_URL, UUID.randomUUID()))
         .andExpect(status().isNotFound())
