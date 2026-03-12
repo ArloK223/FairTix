@@ -34,8 +34,22 @@ public class RateLimitService {
 
         // Configures the limiter once per key
         if (!limiter.isExists()) {
-            // Limit to 3 requests per 30 seconds
-            limiter.trySetRate(RateType.OVERALL, 3, 30, RateIntervalUnit.SECONDS);
+            // /api/auth/*: 10/min (auth protection)
+            if (url.startsWith("/api/auth")) {
+                limiter.trySetRate(RateType.OVERALL, 10, 1, RateIntervalUnit.MINUTES);
+            }
+            // /api/admin/*, /api/orders/*, *holds*: 20/min (admin/order/hold protection)
+            else if (url.startsWith("/api/orders") || url.contains("/holds") || url.startsWith("/api/admin")) {
+                limiter.trySetRate(RateType.OVERALL, 20, 1, RateIntervalUnit.MINUTES);
+            }
+            // /api/inventory/*, *seats*: 60/min (inventory/seat protection)
+            else if (url.startsWith("/api/inventory") || url.contains("/seats")) {
+                limiter.trySetRate(RateType.OVERALL, 60, 1, RateIntervalUnit.MINUTES);
+            }
+            // All others: 100/min (default)
+            else {
+                limiter.trySetRate(RateType.OVERALL, 100, 1, RateIntervalUnit.MINUTES);
+            }
         }
         // Attempts to acquire token; returns false if limit is exceeded
         return limiter.tryAcquire(1);

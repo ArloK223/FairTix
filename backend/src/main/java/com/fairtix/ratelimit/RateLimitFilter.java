@@ -44,8 +44,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
-        String ip = request.getRemoteAddr();
-        String url = request.getRequestURI();
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty()) {
+            ip = request.getRemoteAddr();
+        }
+        String url = request.getRequestURI().replaceAll("/[0-9a-fA-F-]{36}", "/{id}");
 
         if (!rateLimitService.isAllowed(ip, url)) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
