@@ -85,6 +85,8 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, Object>> handleAccessDenied(
       AccessDeniedException ex, HttpServletRequest req) {
     return error(HttpStatus.FORBIDDEN, "FORBIDDEN", "Access denied", req);
+  }
+
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<Map<String, Object>> handleResourceNotFound(
       ResourceNotFoundException ex, HttpServletRequest req) {
