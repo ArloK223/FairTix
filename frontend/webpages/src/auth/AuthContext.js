@@ -52,6 +52,9 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     const data = await api.post('/auth/login', { email, password });
     const decoded = decodeToken(data.token);
+    if (!decoded || !decoded.sub || !decoded.userId || !decoded.role) {
+      throw new Error('Authentication failed: invalid token received from server.');
+    }
     saveToken(data.token);
     setToken(data.token);
     const userInfo = {
@@ -66,6 +69,9 @@ export function AuthProvider({ children }) {
   async function signup(email, password) {
     const data = await api.post('/auth/register', { email, password });
     const decoded = decodeToken(data.token);
+    if (!decoded || !decoded.sub || !decoded.userId || !decoded.role) {
+      throw new Error('Registration failed: invalid token received from server.');
+    }
     saveToken(data.token);
     setToken(data.token);
     const userInfo = {

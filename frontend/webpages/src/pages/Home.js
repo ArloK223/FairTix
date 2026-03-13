@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
-import UseDeviceSize from '../UseDeviceSize';
+import useDeviceSize from '../UseDeviceSize';
 import logo from '../logo.png';
 
 function Home() {
-  const [width] = UseDeviceSize();
+  const [width] = useDeviceSize();
   const { user } = useAuth();
   const navigate = useNavigate();
 
