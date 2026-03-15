@@ -283,4 +283,28 @@ public class RateLimitServiceTest {
         // 101st request blocked
         assertFalse(rateLimitService.isAllowed(ip, url));
     }
+
+    /**
+     * Test that rate limiting is independent for user and IP keys.
+     */
+    @Test
+    public void testRateLimitByUserIdAndIp() {
+        String userKey = "user:11111111-1111-1111-1111-111111111111";
+        String ipKey = "ip:1.2.3.4";
+        String url = "/api/events";
+
+        // User key: allow once, then block
+        when(rateLimiter.isExists()).thenReturn(false);
+        when(rateLimiter.trySetRate(any(), anyLong(), anyLong(), any())).thenReturn(true);
+        when(rateLimiter.tryAcquire(1)).thenReturn(true, false);
+        assertTrue(rateLimitService.isAllowed(userKey, url));
+        assertFalse(rateLimitService.isAllowed(userKey, url));
+
+        // IP key: allow once, then block
+        when(rateLimiter.isExists()).thenReturn(false);
+        when(rateLimiter.trySetRate(any(), anyLong(), anyLong(), any())).thenReturn(true);
+        when(rateLimiter.tryAcquire(1)).thenReturn(true, false);
+        assertTrue(rateLimitService.isAllowed(ipKey, url));
+        assertFalse(rateLimitService.isAllowed(ipKey, url));
+    }
 }

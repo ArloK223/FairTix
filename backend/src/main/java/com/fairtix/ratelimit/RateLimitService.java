@@ -21,16 +21,16 @@ public class RateLimitService {
     }
 
     /**
-     * Checks if a request from a given IP to a specific endpoint is allowed based on the rate limit.
-     * @param ip the IP address of the client making the request
+     * Checks if a request from a given key (userId or IP) to a specific endpoint is allowed based on the rate limit.
+     * @param key the userId or IP address of the client making the request
      * @param url the URL being accessed
      * @return true if the request is allowed, false if it exceeds the rate limit 
      */
-    public boolean isAllowed(String ip, String url) {
-        String key = "rate_limit:" + ip + ":" + url;
+    public boolean isAllowed(String key, String url) {
+        String redisKey = "rate_limit:" + key + ":" + url;
 
         // Retrieves rate limiter from Redis
-        RRateLimiter limiter = redissonClient.getRateLimiter(key);
+        RRateLimiter limiter = redissonClient.getRateLimiter(redisKey);
 
         // Configures the limiter once per key
         if (!limiter.isExists()) {
