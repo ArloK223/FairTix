@@ -14,6 +14,8 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,7 +43,9 @@ class SeatHoldControllerTest {
 
   @BeforeEach
   void setUpMockMvc() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    mockMvc = MockMvcBuilders.webAppContextSetup(context)
+        .apply(springSecurity())
+        .build();
   }
 
   // -------------------------------------------------------------------------
@@ -71,7 +75,6 @@ class SeatHoldControllerTest {
   @Test
   @WithMockUser(roles = "ADMIN")
   void createHold_missingSeatIds_returns400WithValidationError() throws Exception {
-    // seatIds field omitted entirely — null treated as empty by @NotEmpty
     String body = """
         {
           "holderId": "user-1"
@@ -146,7 +149,6 @@ class SeatHoldControllerTest {
   @Test
   @WithMockUser(roles = "ADMIN")
   void errorResponse_alwaysContainsRequiredFields() throws Exception {
-    // Any GlobalExceptionHandler path must emit status/code/message/path/timestamp
     String body = """
         {
           "seatIds":  [],
@@ -163,5 +165,24 @@ class SeatHoldControllerTest {
         .andExpect(jsonPath("$.message").exists())
         .andExpect(jsonPath("$.path").exists())
         .andExpect(jsonPath("$.timestamp").exists());
+  }
+
+  // -------------------------------------------------------------------------
+  // Security → 403 when unauthenticated (anonymous user)
+  // -------------------------------------------------------------------------
+
+  @Test
+  void createHold_unauthenticated_returns403() throws Exception {
+    String body = """
+        {
+          "seatIds":  ["%s"],
+          "holderId": "user-1"
+        }
+        """.formatted(UUID.randomUUID());
+
+    mockMvc.perform(post(CREATE_URL, UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isForbidden());
   }
 }
