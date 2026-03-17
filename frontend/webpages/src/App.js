@@ -9,7 +9,11 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Events from './pages/Events';
 import Dashboard from './pages/Dashboard';
-import AdminEvents from './pages/AdminEvents';
+import AdminLayout from './admin/AdminLayout';
+import AdminDashboard from './admin/pages/AdminDashboard';
+import AdminEventsPage from './admin/pages/AdminEventsPage';
+import AdminSeatsPage from './admin/pages/AdminSeatsPage';
+import AdminUsersPage from './admin/pages/AdminUsersPage';
 
 function App() {
   return (
@@ -31,7 +35,12 @@ function App() {
 
             {/* Admin routes */}
             <Route element={<AdminRoute />}>
-              <Route path="/admin/events" element={<AdminEvents />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="events" element={<AdminEventsPage />} />
+                <Route path="events/:eventId/seats" element={<AdminSeatsPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+              </Route>
             </Route>
 
             {/* Catch-all */}
