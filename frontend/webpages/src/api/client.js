@@ -6,9 +6,12 @@ async function apiRequest(path, options = {}) {
   const token = getToken();
 
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  if (options.body) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;

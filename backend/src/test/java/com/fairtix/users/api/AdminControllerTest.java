@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -55,6 +56,52 @@ class AdminControllerTest {
     targetUser.setPassword(passwordEncoder.encode("password"));
     targetUser.setRole(Role.USER);
     targetUser = userRepository.save(targetUser);
+  }
+
+  // -------------------------------------------------------------------------
+  // GET /api/admin/users
+  // -------------------------------------------------------------------------
+
+  @Test
+  void listUsers_asAdmin_returns200WithPage() throws Exception {
+    mockMvc.perform(get("/api/admin/users")
+            .with(user("admin@test.com").roles("ADMIN")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
+  }
+
+  @Test
+  void listUsers_asUser_returns403() throws Exception {
+    mockMvc.perform(get("/api/admin/users")
+            .with(user("user@test.com").roles("USER")))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void listUsers_unauthenticated_returns403() throws Exception {
+    mockMvc.perform(get("/api/admin/users"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void listUsers_respectsPageSize() throws Exception {
+    mockMvc.perform(get("/api/admin/users")
+            .param("page", "0")
+            .param("size", "1")
+            .with(user("admin@test.com").roles("ADMIN")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.page.size").value(1));
+  }
+
+  @Test
+  void listUsers_capsPageSizeAt100() throws Exception {
+    mockMvc.perform(get("/api/admin/users")
+            .param("size", "200")
+            .with(user("admin@test.com").roles("ADMIN")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.page.size").value(100));
   }
 
   // -------------------------------------------------------------------------
