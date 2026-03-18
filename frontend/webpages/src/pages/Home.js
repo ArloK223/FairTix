@@ -10,8 +10,7 @@ function Home() {
 
   return (
     <div>
-      <br /><br /><br />
-      <div>
+      <div style={{ marginTop: '3em' }}>
         <img width={width} src={logo} alt="FairTix logo" />
       </div>
       <div>
