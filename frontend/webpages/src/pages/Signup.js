@@ -10,6 +10,8 @@ function Signup() {
          <label>
             email: <input name="email" type="email" /></label>
          <label>
+            phone number: <input name="phone number" type="tel" /></label>
+         <label>
             birthday <input name="birthday" type="date" /></label>
          <label>
             password: <input name="password" type="password"></input></label>
@@ -17,7 +19,10 @@ function Signup() {
             confirm password: <input name="confirmpassword" type="password"></input></label>
          <label>
             <input type="submit" value="sign-up" onClick={() => { navigate("/login"); }} /></label>
-            
+
+
+         { // figure out how to implement an age check, and also make sure the passwords match. look into php?
+         }
       </>
    )
 }

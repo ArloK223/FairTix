@@ -3,28 +3,28 @@
   "WorkspaceRootPath": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Home.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\pages\\Home.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Signup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\pages\\Signup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Login.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\pages\\Login.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Events.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\pages\\Events.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Signup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\pages\\Signup.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\UseDeviceSize.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\UseDeviceSize.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Home.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\pages\\Home.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\App.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\App.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\components\\Logo.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webpages\\src\\components\\Logo.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\App.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
@@ -38,31 +38,46 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "UseDeviceSize.js",
-              "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\UseDeviceSize.js",
-              "RelativeDocumentMoniker": "webpages\\src\\UseDeviceSize.js",
-              "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\UseDeviceSize.js",
-              "RelativeToolTip": "webpages\\src\\UseDeviceSize.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 5,
+              "Title": "Logo.js",
+              "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\components\\Logo.js",
+              "RelativeDocumentMoniker": "webpages\\src\\components\\Logo.js",
+              "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\components\\Logo.js",
+              "RelativeToolTip": "webpages\\src\\components\\Logo.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-03-05T18:38:42.465Z"
+              "WhenOpened": "2026-03-22T17:29:58.707Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
+              "Title": "Events.js",
+              "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Events.js",
+              "RelativeDocumentMoniker": "webpages\\src\\pages\\Events.js",
+              "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Events.js",
+              "RelativeToolTip": "webpages\\src\\pages\\Events.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-03-22T18:24:55.704Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "Signup.js",
               "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Signup.js",
               "RelativeDocumentMoniker": "webpages\\src\\pages\\Signup.js",
               "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Signup.js",
               "RelativeToolTip": "webpages\\src\\pages\\Signup.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABNAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-03-01T22:27:50.733Z"
+              "WhenOpened": "2026-03-01T22:27:50.733Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -72,46 +87,36 @@
               "RelativeDocumentMoniker": "webpages\\src\\pages\\Login.js",
               "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Login.js",
               "RelativeToolTip": "webpages\\src\\pages\\Login.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-03-01T22:27:35.753Z"
+              "WhenOpened": "2026-03-01T22:27:35.753Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "package.json",
-              "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\package.json",
-              "RelativeDocumentMoniker": "webpages\\package.json",
-              "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\package.json",
-              "RelativeToolTip": "webpages\\package.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-03-01T06:14:07.319Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "Home.js",
               "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Home.js",
               "RelativeDocumentMoniker": "webpages\\src\\pages\\Home.js",
               "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\pages\\Home.js",
               "RelativeToolTip": "webpages\\src\\pages\\Home.js",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAxwAsAAAAhAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2026-02-27T02:56:00.975Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "App.js",
               "DocumentMoniker": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\App.js",
               "RelativeDocumentMoniker": "webpages\\src\\App.js",
               "ToolTip": "C:\\Users\\midni\\Documents\\GitHub\\FairTix\\frontend\\webpages\\src\\App.js",
               "RelativeToolTip": "webpages\\src\\App.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-02-27T02:28:34.033Z"
+              "WhenOpened": "2026-02-27T02:28:34.033Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -123,7 +128,8 @@
               "RelativeToolTip": "webpages\\src\\App.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-02-27T02:36:07.935Z"
+              "WhenOpened": "2026-02-27T02:36:07.935Z",
+              "EditorCaption": ""
             }
           ]
         }

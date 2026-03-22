@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+// this code isn't mine! it's from https://medium.com/@ismoil.793 -skylar
+
 const UseDeviceSize = () => {
    const [width, setWidth] = useState(0)
    const [height, setHeight] = useState(0)
