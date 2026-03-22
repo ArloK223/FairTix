@@ -3,9 +3,10 @@
     "",
     "\\webpages",
     "\\webpages\\src",
+    "\\webpages\\src\\components",
     "\\webpages\\src\\pages",
     "\\webpages\\src\\styles"
   ],
-  "SelectedNode": "\\webpages\\package.json",
+  "SelectedNode": "\\webpages\\src\\reportWebVitals.js",
   "PreviewInSolutionExplorer": false
 }
