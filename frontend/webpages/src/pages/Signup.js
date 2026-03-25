@@ -28,7 +28,8 @@ function Signup() {
     }
 
     if (birthday) {
-      const birthDate = new Date(birthday);
+      const [y, m, d] = birthday.split('-').map(Number);
+      const birthDate = new Date(y, m - 1, d);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
