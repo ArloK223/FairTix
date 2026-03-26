@@ -18,7 +18,7 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, UUID> {
   @Query("SELECT sh.status, COUNT(sh) FROM SeatHold sh GROUP BY sh.status")
   List<Object[]> countByStatusGrouped();
 
-  @Query(value = "SELECT DATE(sh.created_at) AS day, COUNT(*) FROM seat_holds sh WHERE sh.created_at >= :since GROUP BY DATE(sh.created_at) ORDER BY day", nativeQuery = true)
+  @Query(value = "SELECT CAST(sh.created_at AS DATE) AS hold_date, COUNT(*) FROM seat_holds sh WHERE sh.created_at >= :since GROUP BY CAST(sh.created_at AS DATE) ORDER BY hold_date", nativeQuery = true)
   List<Object[]> countHoldsPerDay(@Param("since") Instant since);
 
   Optional<SeatHold> findByIdAndHolderId(UUID id, String holderId);

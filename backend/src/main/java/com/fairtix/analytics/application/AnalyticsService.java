@@ -16,7 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,9 +43,9 @@ public class AnalyticsService {
   }
 
   public AnalyticsResponse getDashboardAnalytics() {
-    OverviewStats overview = buildOverview();
-    List<VenueCount> eventsByVenue = buildEventsByVenue();
     Map<String, Long> seatsByStatus = buildSeatsByStatus();
+    OverviewStats overview = buildOverview(seatsByStatus);
+    List<VenueCount> eventsByVenue = buildEventsByVenue();
     List<EventInventory> topEvents = buildTopEventsByBookings();
     Map<String, Long> holdsByStatus = buildHoldsByStatus();
     double holdConfirmationRate = computeHoldConfirmationRate(holdsByStatus);
@@ -53,15 +58,14 @@ public class AnalyticsService {
     );
   }
 
-  private OverviewStats buildOverview() {
+  private OverviewStats buildOverview(Map<String, Long> seatsByStatus) {
     long totalEvents = eventRepository.count();
     long upcomingEvents = eventRepository.countByStartTimeAfter(Instant.now());
     long totalUsers = userRepository.count();
     long totalSeats = seatRepository.count();
 
-    Map<String, Long> seatCounts = buildSeatsByStatus();
-    long bookedSeats = seatCounts.getOrDefault("BOOKED", 0L);
-    long activeHolds = seatCounts.getOrDefault("HELD", 0L);
+    long bookedSeats = seatsByStatus.getOrDefault("BOOKED", 0L);
+    long activeHolds = seatsByStatus.getOrDefault("HELD", 0L);
 
     return new OverviewStats(totalEvents, upcomingEvents, totalUsers, totalSeats, bookedSeats, activeHolds);
   }
