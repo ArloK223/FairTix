@@ -18,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-@EnableMethodSecurity
+@EnableMethodSecurity(jsr250Enabled = true)
 @Configuration
 public class SecurityConfig {
 
