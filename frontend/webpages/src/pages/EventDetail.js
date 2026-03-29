@@ -183,6 +183,18 @@ function EventDetail() {
                         isSelected ? 'seat-row-selected' : '',
                       ].join(' ')}
                       onClick={canSelect ? () => toggleSeat(seat.id) : undefined}
+                      role={canSelect ? 'button' : undefined}
+                      tabIndex={canSelect ? 0 : -1}
+                      onKeyDown={
+                        canSelect
+                          ? (e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                toggleSeat(seat.id);
+                              }
+                            }
+                          : undefined
+                      }
                     >
                       <td>{seat.rowLabel}</td>
                       <td>{seat.seatNumber}</td>
