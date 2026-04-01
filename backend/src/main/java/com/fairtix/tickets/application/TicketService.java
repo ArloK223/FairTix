@@ -7,6 +7,7 @@ import com.fairtix.tickets.domain.Ticket;
 import com.fairtix.tickets.infrastructure.TicketRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,13 +20,17 @@ public class TicketService {
     this.ticketRepository = ticketRepository;
   }
 
+  /** Simulated price per seat until a real pricing model is added. */
+  private static final BigDecimal SIMULATED_SEAT_PRICE = new BigDecimal("25.00");
+
   public void issueTickets(Order order, List<SeatHold> holds) {
     List<Ticket> tickets = holds.stream()
         .map(hold -> new Ticket(
             order,
             order.getUser(),
             hold.getSeat(),
-            hold.getSeat().getEvent()))
+            hold.getSeat().getEvent(),
+            SIMULATED_SEAT_PRICE))
         .toList();
     ticketRepository.saveAll(tickets);
   }
