@@ -87,7 +87,7 @@ class AccountDeletionTest {
 
   @Test
   void deleteOwnAccount_releasesActiveHolds() throws Exception {
-    Seat seat = new Seat(event, "A", "1", "1");
+    Seat seat = new Seat(event, "A", "1", "1", new java.math.BigDecimal("25.00"));
     seat.setStatus(SeatStatus.HELD);
     seat = seatRepository.save(seat);
 

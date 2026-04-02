@@ -58,7 +58,7 @@ class PaymentControllerTest {
     Event event = new Event("Test Event", "Test Venue", Instant.now().plusSeconds(86400 * 30));
     event = eventRepository.save(event);
 
-    Seat seat = new Seat(event, "A", "1", "1");
+    Seat seat = new Seat(event, "A", "1", "1", new java.math.BigDecimal("25.00"));
     seat.setStatus(SeatStatus.BOOKED);
     seat = seatRepository.save(seat);
 
