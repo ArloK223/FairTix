@@ -2,10 +2,12 @@ package com.fairtix.users.api;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +16,7 @@ import com.fairtix.users.infrastructure.UserRepository;
 import com.fairtix.users.domain.User;
 import com.fairtix.users.domain.Role;
 import com.fairtix.users.dto.UserResponse;
+import com.fairtix.config.EventSeeder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,7 +29,8 @@ import java.util.UUID;
 /**
  * Admin-only user management endpoints.
  *
- * <p>Provides a paginated user list and the ability to promote users to admin.
+ * <p>
+ * Provides a paginated user list and the ability to promote users to admin.
  */
 @Tag(name = "Admin", description = "User administration")
 @RestController
@@ -34,7 +38,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
+    private EventSeeder eventSeeder;
+
+    public AdminController(UserRepository userRepository, EventSeeder eventSeeder) {
+        this.userRepository = userRepository;
+        this.eventSeeder = eventSeeder;
+    }
 
     /**
      * Returns a paginated list of all users.
@@ -71,5 +81,15 @@ public class AdminController {
 
         user.setRole(Role.ADMIN);
         userRepository.save(user);
+    }
+
+    /**
+     * Seeds the database with upcoming events
+     */
+    @PostMapping("/seed-events")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> seedEvents() {
+        eventSeeder.run();
+        return ResponseEntity.ok("Seeding started");
     }
 }

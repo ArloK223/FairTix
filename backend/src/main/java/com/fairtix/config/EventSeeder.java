@@ -1,23 +1,22 @@
 package com.fairtix.config;
 
 import com.fairtix.events.application.EventService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Async
 @Component
-public class EventSeeder implements CommandLineRunner {
+public class EventSeeder {
 
   private final EventService eventService;
   private final RestTemplate restTemplate = new RestTemplate();
@@ -29,8 +28,7 @@ public class EventSeeder implements CommandLineRunner {
     this.eventService = eventService;
   }
 
-  @Override
-  public void run(String... args) throws Exception {
+  public void run(String... args) {
 
     List<String> locations = readResourceFile("locations.txt");
     List<String> queries = readResourceFile("queries.txt");
@@ -113,15 +111,18 @@ public class EventSeeder implements CommandLineRunner {
     }
   }
 
-  private List<String> readResourceFile(String filename) throws IOException {
+  private List<String> readResourceFile(String filename) {
     try (InputStream is = getClass().getClassLoader().getResourceAsStream(filename)) {
       if (is == null) {
-        throw new RuntimeException("File not found: " + filename);
+        throw new InternalError("File not found: " + filename);
       }
       return new BufferedReader(new InputStreamReader(is))
           .lines()
           .filter(line -> !line.isBlank())
           .toList();
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new InternalError("Error Reading File");
     }
   }
 }

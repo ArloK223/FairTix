@@ -6,7 +6,6 @@ import com.fairtix.events.dto.UpdateEventRequest;
 import com.fairtix.events.infrastructure.EventRepository;
 
 import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,8 +35,12 @@ public class EventService {
    * @return a newly created event
    */
   public Event createEvent(String title, Instant startTime, String venue) {
-    Event event = new Event(title, venue, startTime);
-    return repository.save(event);
+    return repository
+        .findByTitleAndStartTimeAndVenue(title, startTime, venue)
+        .orElseGet(() -> {
+          Event event = new Event(title, venue, startTime);
+          return repository.save(event);
+        });
   }
 
   /**
