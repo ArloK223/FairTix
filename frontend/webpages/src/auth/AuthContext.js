@@ -9,14 +9,22 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const navigate = useNavigate();
 
-  const logout = useCallback(() => {
+  const logout = useCallback((expired = false) => {
     removeToken();
     setUser(null);
     setToken(null);
+    if (expired) {
+      setSessionExpired(true);
+    }
     navigate('/');
   }, [navigate]);
+
+  const clearSessionExpired = useCallback(() => {
+    setSessionExpired(false);
+  }, []);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -41,11 +49,11 @@ export function AuthProvider({ children }) {
 
     const msUntilExpiry = decoded.exp * 1000 - Date.now();
     if (msUntilExpiry <= 0) {
-      logout();
+      logout(true);
       return;
     }
 
-    const timer = setTimeout(logout, msUntilExpiry);
+    const timer = setTimeout(() => logout(true), msUntilExpiry);
     return () => clearTimeout(timer);
   }, [token, logout]);
 
@@ -87,6 +95,8 @@ export function AuthProvider({ children }) {
     user,
     token,
     isLoading,
+    sessionExpired,
+    clearSessionExpired,
     login,
     signup,
     logout,
