@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import api from '../api/client';
 import '../styles/EventDetail.css';
@@ -61,8 +61,11 @@ function EventDetail() {
     setSelectionError('');
   }
 
+  const navigate = useNavigate();
   const [holdSubmitting, setHoldSubmitting] = useState(false);
-  const [holdMessage, setHoldMessage] = useState(null); // { type: 'success'|'error', text }
+  const [holdMessage, setHoldMessage] = useState(null);
+  const [createdHoldIds, setCreatedHoldIds] = useState([]);
+  const [confirmingCheckout, setConfirmingCheckout] = useState(false);
 
   async function handleHoldSeats() {
     if (selectedSeatIds.size === 0 || holdSubmitting) return;
@@ -70,9 +73,11 @@ function EventDetail() {
     setHoldMessage(null);
     setSelectionError('');
     try {
-      await api.post(`/api/events/${eventId}/holds`, {
+      const holds = await api.post(`/api/events/${eventId}/holds`, {
         seatIds: [...selectedSeatIds],
       });
+      const holdIds = (holds || []).map((h) => h.id);
+      setCreatedHoldIds(holdIds);
       setSelectedSeatIds(new Set());
       setHoldMessage({ type: 'success', text: 'Hold created — expires in 10 minutes.' });
       await fetchData();
@@ -84,10 +89,30 @@ function EventDetail() {
       } else {
         setHoldMessage({ type: 'error', text: err.message || 'Failed to create hold.' });
       }
+      setCreatedHoldIds([]);
       setSelectedSeatIds(new Set());
       await fetchData();
     } finally {
       setHoldSubmitting(false);
+    }
+  }
+
+  async function handleConfirmAndCheckout() {
+    if (createdHoldIds.length === 0 || confirmingCheckout) return;
+    setConfirmingCheckout(true);
+    setHoldMessage(null);
+    try {
+      await Promise.all(
+        createdHoldIds.map((id) => api.post(`/api/holds/${id}/confirm`))
+      );
+      navigate('/checkout', { state: { holdIds: createdHoldIds } });
+    } catch (err) {
+      setHoldMessage({
+        type: 'error',
+        text: err.message || 'Failed to confirm holds. Please try from My Holds.',
+      });
+    } finally {
+      setConfirmingCheckout(false);
     }
   }
 
@@ -112,7 +137,19 @@ function EventDetail() {
     fetchData();
   }, [fetchData]);
 
-  if (loading) return <div className="loading">Loading event details...</div>;
+  if (loading) return (
+    <div className="event-detail">
+      <Link to="/events" className="event-detail-back">&larr; Back to Events</Link>
+      <div className="event-detail-skeleton">
+        <div className="skeleton-line" style={{ height: '1.5rem', width: '60%', marginBottom: '0.75rem' }} />
+        <div className="skeleton-line" style={{ height: '1rem', width: '40%', marginBottom: '1.5rem' }} />
+        <div className="skeleton-line" style={{ height: '0.9rem', width: '30%', marginBottom: '0.5rem' }} />
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="skeleton-line" style={{ height: '2rem', width: '100%', marginBottom: '0.4rem' }} />
+        ))}
+      </div>
+    </div>
+  );
   if (error) return (
     <div className="event-detail">
       <Link to="/events" className="event-detail-back">&larr; Back to Events</Link>
@@ -220,6 +257,12 @@ function EventDetail() {
         ))
       )}
 
+      {seats.length > 0 && (!summary.AVAILABLE || summary.AVAILABLE === 0) && (
+        <div className="seats-all-taken">
+          <p>All seats are currently held or sold. Check back later or refresh to see updates.</p>
+        </div>
+      )}
+
       {!user && seats.length > 0 && (
         <div className="login-prompt">
           <Link to="/login">Log in</Link> to hold seats.
@@ -229,8 +272,17 @@ function EventDetail() {
       {holdMessage && (
         <div className={`hold-message ${holdMessage.type}`}>
           {holdMessage.text}
-          {holdMessage.type === 'success' && (
-            <> <Link to="/my-holds" className="hold-message-link">View My Holds</Link></>
+          {holdMessage.type === 'success' && createdHoldIds.length > 0 && (
+            <div className="hold-message-actions">
+              <button
+                className="hold-message-checkout"
+                onClick={handleConfirmAndCheckout}
+                disabled={confirmingCheckout}
+              >
+                {confirmingCheckout ? 'Confirming...' : 'Confirm & Checkout'}
+              </button>
+              <Link to="/my-holds" className="hold-message-link">View My Holds</Link>
+            </div>
           )}
         </div>
       )}
