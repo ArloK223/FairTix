@@ -34,7 +34,7 @@ public class VenueController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public VenueResponse createVenue(@RequestBody CreateVenueRequest request){
+    public VenueResponse createVenue(@Valid @RequestBody CreateVenueRequest request){
         Venue venue = service.createVenue(request.name(), request.address());
         return VenueResponse.from(venue);
     }
@@ -55,7 +55,7 @@ public class VenueController {
             @RequestParam(required = false) String Address,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Page<Venue> venues = service.findAll(VenueName, Address, PageRequest.of(page, Math.min(size, 100)));
+        Page<Venue> venues = service.search(VenueName, Address, PageRequest.of(page, Math.min(size, 100)));
         return (Page<VenueResponse>) venues.map(VenueResponse::from);
     }
 
@@ -65,6 +65,8 @@ public class VenueController {
      * @param id the id of the venue
      * @return the requested venue which matches the id.
      */
+    @PreAuthorize("hasRole('Admin')")
+    @GetMapping("/{id}")
     public VenueResponse getVenue(@PathVariable UUID id) {
         return VenueResponse.from(service.getVenue(id));
     }

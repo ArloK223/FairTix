@@ -1,12 +1,22 @@
 package com.fairtix.venues.application;
 
+import com.fairtix.common.ResourceNotFoundException;
 import com.fairtix.venues.domain.Venue;
 import com.fairtix.venues.infrastructure.VenueRepository;
+import com.fairtix.venues.dto.UpdateEventRequest;
+
+import jakarta.persistence.criteria.Predicate;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +48,7 @@ public class VenueService {
      */
     public Venue getVenue(UUID id){
         return repository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("Venue not found!"));
+                .orElseThrow(()-> new ResourceNotFoundException("Venue not found!"));
     }
 
     /**
@@ -48,15 +58,29 @@ public class VenueService {
      * @param pageable determines if within a page.
      * @return finds venues within the pages.
      */
-    public Page<Venue> findAll(String VenueName, String Address, Pageable pageable){
-        return repository.findAll(pageable);
-    }
+    public Page<Venue> search(
+            String VenueName,
+            String Address,
+            Pageable pageable){
+        Specification<Venue> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-    /**
-     * Lists the venues as a whole.
-     * @return all venues in the repository
-     */
-    public List<Venue> getAllVenues(){
-        return repository.findAll();
-    }
+            if (VenueName != null && !VenueName.isBlank()){
+                predicates.add(
+                        cb.like(
+                                cb.lower(root.get("Venue Name")), "%" + VenueName.toLowerCase() + "%")
+                        )
+                )
+            }
+            if (Address != null && !VenueName.isBlank()){
+                predicates.add(
+                        cb.like(
+                                cb.lower(root.get("Venue Name")), "%" + VenueName.toLowerCase() + "%")
+                        )
+                )
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+            return repository.findAll(spec, pageable);
+        }
 }
