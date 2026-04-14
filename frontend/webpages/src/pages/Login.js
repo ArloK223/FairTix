@@ -57,14 +57,33 @@ function Login() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      if (err.status === 429) {
-        const retryAfter = err.body?.remainingSeconds || 60;
-        startLockoutTimer(retryAfter);
-        setError('Account temporarily locked due to too many failed attempts.');
-      } else {
-        setError(err.message || 'Login failed');
-      }
-    } finally {
+  console.error(err);
+
+ 
+  if (err.status === 429) {
+    const retryAfter = err.body?.remainingSeconds || 60;
+    startLockoutTimer(retryAfter);
+    setError('Account temporarily locked due to too many failed attempts.');
+    return;
+  }
+
+  
+  if (err.response) {
+    const status = err.response.status;
+
+    if (status === 401 || status === 400) {
+      setError('Invalid email or password.');
+    } else if (status >= 500) {
+      setError('Server error. Please try again later.');
+    } else {
+      setError('Login failed. Please try again.');
+    }
+  } 
+  
+  else {
+    setError('Network error. Please check your connection.');
+  }
+} finally {
       setLoading(false);
     }
   }
