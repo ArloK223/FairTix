@@ -1,4 +1,4 @@
-package com.fairtix.events.dto;
+package com.fairtix.venues.dto;
 
 import java.time.Instant;
 
@@ -7,7 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record UpdateVenueRequest(
-        @NotBank @Size(max = 500) String title,
-        @NotNull Instant startTime){
+        @NotBlank @Size(max = 500) String name,
+        @NotBlank @Size(max = 500) String address)
+       {
 
 }

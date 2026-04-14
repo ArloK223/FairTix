@@ -1,6 +1,7 @@
 package com.fairtix.venues.infrastructure;
 
 import com.fairtix.venues.domain.Venue;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

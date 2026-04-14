@@ -1,5 +1,6 @@
 package com.fairtix.venues.api;
 
+import com.fairtix.events.dto.UpdateEventRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,8 +50,8 @@ public class VenueController {
 
     /**
      * Take the details about the venues requested and returns information about that venue.
-     * @param VenueName the name of the venue.
-     * @param Address the address of that venue.
+     * @param name the name of the venue.
+     * @param address the address of that venue.
      * @param page the page number.
      * @param size number of items per page.
      * @return the requested page.
@@ -70,7 +71,7 @@ public class VenueController {
     @PermitAll
     @GetMapping
     public VenueResponse getVenue(@PathVariable UUID id){
-        return VenueResponse.from(service.getEvent(id));
+        return VenueResponse.from(service.getVenue(id));
     }
 
     /**
@@ -80,8 +81,9 @@ public class VenueController {
      */
     @PreAuthorize("hasRole('Admin')")
     @GetMapping("/{id}")
-    public VenueResponse getVenue(@PathVariable UUID id) {
-        return VenueResponse.from(service.getVenue(id));
+    public VenueResponse Update(@PathVariable UUID id, @Valid @RequestBody UpdateVenueRequest request){
+        Venue updated = service.update(id, request);
+        return VenueResponse.from(updated);
     }
 
 }

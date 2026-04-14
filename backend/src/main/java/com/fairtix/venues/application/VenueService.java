@@ -3,7 +3,7 @@ package com.fairtix.venues.application;
 import com.fairtix.common.ResourceNotFoundException;
 import com.fairtix.venues.domain.Venue;
 import com.fairtix.venues.infrastructure.VenueRepository;
-import com.fairtix.venues.dto.UpdateEventRequest;
+import com.fairtix.venues.dto.UpdateVenueRequest;
 
 import jakarta.persistence.criteria.Predicate;
 
@@ -49,6 +49,12 @@ public class VenueService {
     public Venue getVenue(UUID id){
         return repository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Venue not found!"));
+    }
+
+    public Venue update(UUID id, UpdateVenueRequest request){
+        Venue venue = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found: " + id));
+        venue.update(request.name)
     }
 
     /**
