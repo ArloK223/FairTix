@@ -86,4 +86,11 @@ public class VenueController {
         return VenueResponse.from(updated);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id){
+        service.delete(id);
+    }
+
 }

@@ -28,6 +28,11 @@ public class Venue {
     protected Venue(){
     }
 
+    public void update(String name, String address){
+        this.name = name;
+        this.address = address;
+    }
+
     public UUID getId() {
         return id;
     }

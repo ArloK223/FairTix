@@ -43,7 +43,7 @@ public class VenueService {
     /**
      *
      * @param id the id of the venue.
-     * @throws IllegalArgumentException if the venue is not found.
+     * @throws ResourceNotFoundException if the venue is not found.
      * @return the requested venue {@link Venue}
      */
     public Venue getVenue(UUID id){
@@ -54,7 +54,14 @@ public class VenueService {
     public Venue update(UUID id, UpdateVenueRequest request){
         Venue venue = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found: " + id));
-        venue.update(request.name)
+        venue.update(request.name(), request.address());
+        return venue;
+    }
+
+    public void delete (UUID id){
+        Venue venue = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Venue not found: " + id));
+        repository.delete(venue);
     }
 
     /**
