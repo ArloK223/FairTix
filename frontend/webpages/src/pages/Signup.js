@@ -49,25 +49,18 @@ function Signup() {
       await signup(email, password);
       navigate('/dashboard', { replace: true });
     } catch (err) {
-  console.error(err);
-
-  if (err.response) {
-    const status = err.response.status;
-
-    if (status === 400) {
-      setError('Invalid registration details.');
-    } else if (status === 409) {
-      setError('Email already exists.');
-    } else if (status >= 500) {
-      setError('Server error. Please try again later.');
-    } else {
-      setError('Registration failed. Please try again.');
-    }
-  } 
-  else {
-    setError('Network error. Please check your connection.');
-  }
-} finally {
+      if (err.status === 409) {
+        setError('Email already exists.');
+      } else if (err.status === 400) {
+        setError('Invalid registration details.');
+      } else if (err.status >= 500) {
+        setError('Server error. Please try again later.');
+      } else if (err.status) {
+        setError('Registration failed. Please try again.');
+      } else {
+        setError('Network error. Please check your connection.');
+      }
+    } finally {
       setLoading(false);
     }
   }
