@@ -19,6 +19,7 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final LoginAttemptService loginAttemptService;
+  private final RecaptchaService recaptchaService;
 
   private static final Pattern UPPERCASE = Pattern.compile("[A-Z]");
   private static final Pattern LOWERCASE = Pattern.compile("[a-z]");
@@ -29,11 +30,13 @@ public class AuthService {
   public AuthService(UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       JwtService jwtService,
-      LoginAttemptService loginAttemptService) {
+      LoginAttemptService loginAttemptService,
+      RecaptchaService recaptchaService) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.loginAttemptService = loginAttemptService;
+    this.recaptchaService = recaptchaService;
   }
 
   public String register(RegisterRequest request) {
@@ -56,22 +59,29 @@ public class AuthService {
   }
 
   public String login(LoginRequest request) {
+    String email = request.email();
+
     // Check lockout before anything else
-    if (loginAttemptService.isLocked(request.email())) {
-      long remaining = loginAttemptService.getRemainingLockoutSeconds(request.email());
-      throw new AccountLockedException(remaining);
+    if (loginAttemptService.isLocked(email)) {
+      throw new AccountLockedException(loginAttemptService.getRemainingLockoutSeconds(email));
     }
 
-    User user = userRepository.findByEmail(request.email()).orElse(null);
+    // After 3 failures, captcha is required; validate before password check
+    long failedAttempts = loginAttemptService.getAttemptCount(email);
+    if (recaptchaService.isCaptchaRequired(failedAttempts)) {
+      recaptchaService.assertValidToken(request.recaptchaToken());
+    }
+
+    User user = userRepository.findByEmail(email).orElse(null);
 
     if (user == null || user.isDeleted()
         || !passwordEncoder.matches(request.password(), user.getPassword())) {
-      loginAttemptService.recordFailure(request.email());
+      loginAttemptService.recordFailure(email);
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
     }
 
-    // Successful login — reset attempts
-    loginAttemptService.resetAttempts(request.email());
+    // Successful login -- reset attempts
+    loginAttemptService.resetAttempts(email);
 
     return jwtService.generateToken(
         user.getId(),
