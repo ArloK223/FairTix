@@ -55,7 +55,7 @@ function Login() {
     e.preventDefault();
     if (lockoutSeconds > 0) return;
 
-    const shouldShowCaptcha = loginAttempts >= 2;
+    const shouldShowCaptcha = loginAttempts >= 3;
     if (shouldShowCaptcha && !captchaToken) {
       setError('Please complete the reCAPTCHA checkbox before logging in.');
       return;
@@ -79,8 +79,12 @@ function Login() {
         startLockoutTimer(retryAfter);
         setError('Account temporarily locked due to too many failed attempts.');
       } else if (err.code === 'CAPTCHA_REQUIRED') {
-        setLoginAttempts((prev) => (prev < 2 ? 2 : prev));
+        setLoginAttempts((prev) => (prev < 3 ? 3 : prev));
         setError('Please complete the reCAPTCHA checkbox before logging in.');
+      } else if (err.code === 'INVALID_CAPTCHA') {
+        setError('reCAPTCHA verification failed. Please try again.');
+      } else if (err.code === 'CAPTCHA_UNAVAILABLE') {
+        setError('reCAPTCHA service is temporarily unavailable. Please try again later.');
       } else if (err.status === 401 || err.status === 400) {
         setError('Invalid email or password.');
       } else if (err.status >= 500) {
@@ -96,7 +100,7 @@ function Login() {
   }
 
   const isLocked = lockoutSeconds > 0;
-  const shouldShowCaptcha = !isLocked && loginAttempts >= 2;
+  const shouldShowCaptcha = !isLocked && loginAttempts >= 3;
 
   return (
     <div className="login-page">

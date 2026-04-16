@@ -164,6 +164,16 @@ function EventDetail() {
     fetchData();
   }, [fetchData]);
 
+  // Auto-poll seat availability every 10 seconds (only when tab is visible)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        fetchData();
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
   if (loading) return (
     <div className="event-detail">
       <Link to="/events" className="event-detail-back">&larr; Back to Events</Link>
