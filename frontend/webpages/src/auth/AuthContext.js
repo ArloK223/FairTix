@@ -49,8 +49,8 @@ export function AuthProvider({ children }) {
     return () => clearTimeout(timer);
   }, [token, logout]);
 
-  async function login(email, password) {
-    const data = await api.post('/auth/login', { email, password });
+  async function login(email, password, recaptchaToken = '') {
+    const data = await api.post('/auth/login', { email, password, recaptchaToken });
     const decoded = decodeToken(data.token);
     if (!decoded || !decoded.sub || !decoded.userId || !decoded.role) {
       throw new Error('Authentication failed: invalid token received from server.');
