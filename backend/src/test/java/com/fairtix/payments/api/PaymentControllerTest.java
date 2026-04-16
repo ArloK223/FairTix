@@ -56,7 +56,7 @@ class PaymentControllerTest {
     user.setEmailVerified(true);
     user = userRepository.save(user);
 
-    Event event = new Event("Test Event", "Test Venue", Instant.now().plusSeconds(86400 * 30), null);
+    Event event = new Event("Test Event", null, Instant.now().plusSeconds(86400 * 30), null);
     event = eventRepository.save(event);
 
     Seat seat = new Seat(event, "A", "1", "1", new java.math.BigDecimal("25.00"));
