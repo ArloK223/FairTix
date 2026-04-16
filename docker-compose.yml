@@ -43,6 +43,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
+      RECAPTCHA_SECRET: ${RECAPTCHA_SECRET}
+      RECAPTCHA_ENABLED: ${RECAPTCHA_ENABLED:-false}
     depends_on:
       postgres:
         condition: service_healthy
