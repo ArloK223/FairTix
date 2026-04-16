@@ -68,9 +68,9 @@ class TicketControllerTest {
   }
 
   @Test
-  void listTickets_unauthenticated_returns403() throws Exception {
+  void listTickets_unauthenticated_returns401() throws Exception {
     mockMvc.perform(get("/api/tickets"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test

@@ -108,9 +108,9 @@ class AccountDeletionTest {
   }
 
   @Test
-  void deleteOwnAccount_unauthenticated_returns403() throws Exception {
+  void deleteOwnAccount_unauthenticated_returns401() throws Exception {
     mockMvc.perform(delete("/api/users/me"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test

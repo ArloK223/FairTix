@@ -107,7 +107,7 @@ public class TransferService {
 
         var ticket = request.getTicket();
         ticket.setUser(request.getToUser());
-        ticket.setStatus(TicketStatus.TRANSFERRED);
+        ticket.setStatus(TicketStatus.VALID);
         ticketRepository.save(ticket);
 
         request.setStatus(TransferStatus.ACCEPTED);

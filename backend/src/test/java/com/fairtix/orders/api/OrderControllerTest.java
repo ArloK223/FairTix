@@ -64,7 +64,7 @@ class OrderControllerTest {
   }
 
   @Test
-  void createOrder_unauthenticated_returns403() throws Exception {
+  void createOrder_unauthenticated_returns401() throws Exception {
     String body = """
         { "holdIds": ["00000000-0000-0000-0000-000000000001"] }
         """;
@@ -72,7 +72,7 @@ class OrderControllerTest {
     mockMvc.perform(post("/api/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .content(body))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -139,8 +139,8 @@ class OrderControllerTest {
   }
 
   @Test
-  void listOrders_unauthenticated_returns403() throws Exception {
+  void listOrders_unauthenticated_returns401() throws Exception {
     mockMvc.perform(get("/api/orders"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 }

@@ -47,7 +47,7 @@ public class PaymentSimulationService {
     if (outcome == PaymentStatus.SUCCESS) {
       auditService.log(userId, "PAYMENT_PROCESSED", "PAYMENT", saved.getId(), null);
     } else {
-      auditService.log(userId, "PAYMENT_FAILED", "PAYMENT", orderId, "outcome=" + outcome);
+      auditService.log(userId, "PAYMENT_FAILED", "PAYMENT", saved.getId(), "outcome=" + outcome);
     }
 
     return saved;

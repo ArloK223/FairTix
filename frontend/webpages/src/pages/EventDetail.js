@@ -157,6 +157,12 @@ function EventDetail() {
           // non-critical
         }
       }
+      // Reset queue state if event doesn't require queue
+      if (!eventData.queueRequired) {
+        setQueueStatus(null);
+        setQueueError('');
+        setAdmissionExpiresAt(null);
+      }
       // Fetch queue status if event requires queue and user is logged in
       if (eventData.queueRequired && user) {
         try {
@@ -202,6 +208,10 @@ function EventDetail() {
 
   useEffect(() => {
     setLoading(true);
+    setQueueStatus(null);
+    setQueueError('');
+    setAdmissionExpiresAt(null);
+    setAdmissionCountdown('');
     fetchData();
   }, [fetchData]);
 

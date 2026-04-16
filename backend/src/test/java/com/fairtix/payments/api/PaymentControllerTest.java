@@ -132,7 +132,7 @@ class PaymentControllerTest {
     mockMvc.perform(post("/api/payments/checkout")
             .contentType(MediaType.APPLICATION_JSON)
             .content(body))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test

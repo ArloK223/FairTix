@@ -98,10 +98,10 @@ class SecurityAcceptanceTest {
               .content("""
                   { "seatIds": ["00000000-0000-0000-0000-000000000001"], "durationMinutes": 10 }
                   """))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
 
       mockMvc.perform(get("/api/holds"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -111,16 +111,16 @@ class SecurityAcceptanceTest {
               .content("""
                   { "holdIds": ["00000000-0000-0000-0000-000000000001"] }
                   """))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
 
       mockMvc.perform(get("/api/orders"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
     }
 
     @Test
     void ticketEndpoints_requireAuth() throws Exception {
       mockMvc.perform(get("/api/tickets"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -130,13 +130,13 @@ class SecurityAcceptanceTest {
               .content("""
                   { "holdIds": ["00000000-0000-0000-0000-000000000001"] }
                   """))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
     }
 
     @Test
     void adminEndpoints_requireAuth() throws Exception {
       mockMvc.perform(get("/api/admin/users"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isUnauthorized());
     }
   }
 

@@ -100,7 +100,7 @@ class EventControllerTest {
   }
 
   @Test
-  void createEvent_unauthenticated_returns403() throws Exception {
+  void createEvent_unauthenticated_returns401() throws Exception {
     String body = """
         {
           "title":     "Test Concert",
@@ -112,7 +112,7 @@ class EventControllerTest {
     mockMvc.perform(post("/api/events")
             .contentType(MediaType.APPLICATION_JSON)
             .content(body))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
   }
 
   // -------------------------------------------------------------------------

@@ -199,19 +199,25 @@ public class OrderService {
   }
 
   private void validatePurchaseCaps(UUID userId, List<SeatHold> holds) {
-    // Group holds by event, then check cap per event
-    Map<Event, Long> newTicketsByEvent = holds.stream()
+    // Group by event ID (UUID) to avoid JPA proxy identity issues
+    Map<UUID, Long> newTicketsByEventId = holds.stream()
         .collect(Collectors.groupingBy(
-            hold -> hold.getSeat().getEvent(),
+            hold -> hold.getSeat().getEvent().getId(),
             Collectors.counting()));
 
-    for (Map.Entry<Event, Long> entry : newTicketsByEvent.entrySet()) {
-      Event event = entry.getKey();
+    // Build a lookup map from eventId → Event for cap/title retrieval
+    Map<UUID, Event> eventById = holds.stream()
+        .map(hold -> hold.getSeat().getEvent())
+        .collect(Collectors.toMap(Event::getId, e -> e, (a, b) -> a));
+
+    for (Map.Entry<UUID, Long> entry : newTicketsByEventId.entrySet()) {
+      UUID eventId = entry.getKey();
+      Event event = eventById.get(eventId);
       Integer cap = event.getMaxTicketsPerUser();
       if (cap == null) continue;
 
       long existing = ticketRepository.countByUser_IdAndEvent_IdAndStatusNot(
-          userId, event.getId(), TicketStatus.CANCELLED);
+          userId, eventId, TicketStatus.CANCELLED);
       long newCount = entry.getValue();
       if (existing + newCount > cap) {
         throw new PurchaseCapExceededException(
