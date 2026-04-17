@@ -6,6 +6,7 @@ import WaitingRoom from '../components/WaitingRoom';
 import SeatMap from '../components/SeatMap';
 import '../styles/EventDetail.css';
 
+const POLL_INTERVAL_MS = 10000;
 const MAX_SEATS_PER_HOLD = 10;
 
 function groupSeatsBySection(seats) {
@@ -216,6 +217,16 @@ function EventDetail() {
     setAdmissionExpiresAt(null);
     setAdmissionCountdown('');
     fetchData();
+  }, [fetchData]);
+
+  // Auto-poll seat availability every 10 seconds (only when tab is visible)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        fetchData();
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [fetchData]);
 
   // Countdown timer for admission window

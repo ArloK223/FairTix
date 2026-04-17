@@ -95,7 +95,7 @@ test('calls login with correct credentials on successful submit', async () => {
   renderLogin(loginFn);
   await submitForm('test@example.com', 'mypassword');
   await waitFor(() =>
-    expect(loginFn).toHaveBeenCalledWith('test@example.com', 'mypassword')
+    expect(loginFn).toHaveBeenCalledWith('test@example.com', 'mypassword', '')
   );
 });
 
