@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/useAuth';
 import api from '../api/client';
 import '../styles/MySupportTickets.css';
 
@@ -22,7 +21,6 @@ const STATUS_CLASS = {
 
 function SupportTicketDetail() {
   const { id } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);

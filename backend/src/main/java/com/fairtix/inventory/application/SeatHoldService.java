@@ -96,7 +96,8 @@ public class SeatHoldService {
     Integer cap = event.getMaxTicketsPerUser();
     if (cap != null) {
       long requested = seatIds.stream().distinct().count();
-      long purchased = ticketRepository.countByUser_IdAndEvent_IdAndStatusNot(ownerId, eventId, TicketStatus.CANCELLED);
+      long purchased = ticketRepository.countByUser_IdAndEvent_IdAndStatusNotIn(ownerId, eventId,
+          List.of(TicketStatus.CANCELLED, TicketStatus.REFUNDED));
       long heldAlready = seatHoldRepository.countByOwnerIdAndSeat_Event_IdAndStatus(ownerId, eventId, HoldStatus.ACTIVE);
       if (purchased + heldAlready + requested > cap) {
         throw new SeatHoldConflictException(

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import api from '../api/client';
 import '../styles/RefundDialog.css';
 
+const REFUND_WINDOW_DAYS = 14;
+const REFUND_REVIEW_DAYS = '3–5 business';
+
 function RefundDialog({ ticket, onClose, onSuccess }) {
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,7 +43,7 @@ function RefundDialog({ ticket, onClose, onSuccess }) {
           )}
         </div>
         <p className="refund-dialog-note">
-          Refunds are reviewed within 3–5 business days. You must request within 14 days of purchase.
+          Refunds are reviewed within {REFUND_REVIEW_DAYS} days. You must request within {REFUND_WINDOW_DAYS} days of purchase.
           Tickets with used status are not eligible.
         </p>
         <form onSubmit={handleSubmit}>

@@ -215,7 +215,7 @@ class EventServiceTest {
         null,
         false,
         null,
-        false,
+        true,
         PageRequest.of(0, 10));
 
     assertThat(results.getContent()).isNotEmpty();

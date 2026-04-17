@@ -216,8 +216,9 @@ public class RefundService {
         .filter(o -> o.getStatus() == OrderStatus.COMPLETED)
         .distinct()
         .forEach(order -> {
-          // Skip if a refund already exists for this order
-          boolean alreadyRefunded = !refundRepository.findAllByOrderId(order.getId()).isEmpty();
+          // Skip only if this order has already been definitively refunded
+          boolean alreadyRefunded = refundRepository.findAllByOrderId(order.getId()).stream()
+              .anyMatch(r -> r.getStatus() == RefundStatus.COMPLETED);
           if (alreadyRefunded) return;
 
           try {

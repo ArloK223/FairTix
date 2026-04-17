@@ -72,7 +72,7 @@ function AdminSupportPage() {
     api.get(`/api/admin/support/tickets?${params}`)
       .then((data) => {
         setTickets(data?.content || []);
-        setTotal(data?.totalElements || 0);
+        setTotal(data?.page?.totalElements || 0);
       })
       .catch((err) => setError(err.message || 'Failed to load support tickets'))
       .finally(() => setLoading(false));

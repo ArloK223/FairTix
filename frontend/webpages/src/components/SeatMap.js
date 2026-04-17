@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 
 const SEAT_SIZE = 28;
 const SEAT_RADIUS = 5;
@@ -82,7 +82,7 @@ function SeatMap({ seats, selectedSeatIds, onToggleSeat, canSelect }) {
   const panStart = useRef(null);
   const svgRef = useRef(null);
 
-  const { sections, seats: layoutSeats, totalWidth, totalHeight } = buildLayout(seats);
+  const { sections, seats: layoutSeats, totalWidth, totalHeight } = useMemo(() => buildLayout(seats), [seats]);
 
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;

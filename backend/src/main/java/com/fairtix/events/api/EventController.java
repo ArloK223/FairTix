@@ -88,7 +88,8 @@ public class EventController {
 
         boolean adminView = principal != null && principal.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        Page<Event> events = service.search(venueName, title, upcoming, status, adminView,
+        EventStatus effectiveStatus = adminView ? status : null;
+        Page<Event> events = service.search(venueName, title, upcoming, effectiveStatus, adminView,
                 PageRequest.of(page, Math.min(size, 100)));
         return events.map(EventResponse::from);
     }

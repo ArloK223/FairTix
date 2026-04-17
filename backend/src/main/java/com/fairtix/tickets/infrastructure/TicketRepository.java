@@ -15,6 +15,8 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
   long countByUser_IdAndEvent_IdAndStatusNot(UUID userId, UUID eventId, TicketStatus status);
 
+  long countByUser_IdAndEvent_IdAndStatusNotIn(UUID userId, UUID eventId, java.util.Collection<TicketStatus> statuses);
+
   /** Cancel cascade: find all tickets for a given event with a given status. */
   List<Ticket> findAllByEvent_IdAndStatus(UUID eventId, TicketStatus status);
 }

@@ -8,7 +8,6 @@ import com.fairtix.notifications.domain.NotificationPreference;
 import com.fairtix.support.domain.SupportTicket;
 import com.fairtix.support.domain.TicketCategory;
 import com.fairtix.support.domain.TicketMessage;
-import com.fairtix.support.domain.TicketPriority;
 import com.fairtix.support.domain.TicketStatus;
 import com.fairtix.support.dto.AdminUpdateTicketRequest;
 import com.fairtix.support.dto.SupportTicketResponse;
@@ -18,6 +17,7 @@ import com.fairtix.support.infrastructure.TicketMessageRepository;
 import com.fairtix.users.domain.User;
 import com.fairtix.users.infrastructure.UserRepository;
 import org.slf4j.Logger;
+import org.springframework.security.access.AccessDeniedException;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -98,7 +98,7 @@ public class SupportTicketService {
         boolean isOwner = ticket.getUser().getId().equals(userId);
         boolean isAdmin = author.getRole().name().equals("ADMIN");
         if (!isOwner && !isAdmin) {
-            throw new IllegalStateException("Access denied to ticket: " + ticketId);
+            throw new AccessDeniedException("Access denied to ticket: " + ticketId);
         }
 
         if (ticket.getStatus() == TicketStatus.CLOSED) {
@@ -149,11 +149,11 @@ public class SupportTicketService {
                 .orElseThrow(() -> new SupportTicketNotFoundException(ticketId));
 
         if (!isAdmin && !ticket.getUser().getId().equals(requestingUserId)) {
-            throw new IllegalStateException("Access denied to ticket: " + ticketId);
+            throw new AccessDeniedException("Access denied to ticket: " + ticketId);
         }
 
         List<TicketMessageResponse> messages = messageRepository
-                .findByTicketIdOrderByCreatedAtAsc(ticketId)
+                .findByTicket_IdOrderByCreatedAtAsc(ticketId)
                 .stream()
                 .map(TicketMessageResponse::from)
                 .collect(Collectors.toList());
@@ -171,7 +171,7 @@ public class SupportTicketService {
                 .orElse(false);
 
         if (!isAdmin && !ticket.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("Access denied to ticket: " + ticketId);
+            throw new AccessDeniedException("Access denied to ticket: " + ticketId);
         }
 
         ticket.setStatus(TicketStatus.CLOSED);
