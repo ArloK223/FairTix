@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import App from './App';
+import * as tokenUtils from './auth/tokenUtils';
 
 jest.mock('./auth/tokenUtils', () => ({
-  fetchCurrentUser: jest.fn().mockResolvedValue(null),
+  fetchCurrentUser: jest.fn(),
 }));
 
 jest.mock('./api/client', () => ({
@@ -12,6 +13,10 @@ jest.mock('./api/client', () => ({
     post: jest.fn().mockResolvedValue(null),
   },
 }));
+
+beforeEach(() => {
+  tokenUtils.fetchCurrentUser.mockResolvedValue(null);
+});
 
 test('shows session expired banner when auth:session-expired event fires', async () => {
   render(<App />);
