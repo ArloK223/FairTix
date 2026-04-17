@@ -179,6 +179,39 @@ function Checkout() {
           <h2>Order Confirmed!</h2>
           <p>Your payment was successful and tickets have been issued.</p>
           <p className="checkout-order-id">Order ID: {orderResult.orderId || orderResult.id}</p>
+          {holds.length > 0 && (
+            <div className="checkout-success-summary">
+              <h3>Order Summary</h3>
+              <table className="checkout-table">
+                <thead>
+                  <tr>
+                    <th>Section</th>
+                    <th>Row</th>
+                    <th>Seat</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {holds.map((hold) => {
+                    const seat = seatMap[hold.seatId];
+                    return (
+                      <tr key={hold.id}>
+                        <td>{seat ? seat.section : '—'}</td>
+                        <td>{seat ? seat.rowLabel : '—'}</td>
+                        <td>{seat ? seat.seatNumber : hold.seatId.slice(0, 8) + '...'}</td>
+                        <td>${getSeatPrice(hold).toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <div className="checkout-total">
+                <span>{holds.length} seat{holds.length > 1 ? 's' : ''}</span>
+                <span className="checkout-price">${calculateTotal().toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+          <p className="checkout-email-notice">A confirmation email has been sent to your email address.</p>
           <div className="checkout-success-actions">
             <Link to="/my-tickets" className="checkout-btn-primary">View My Tickets</Link>
             <Link to="/events" className="checkout-btn-secondary">Browse Events</Link>
