@@ -155,6 +155,7 @@ public class EventService {
   public Page<Event> search(
       String venue,
       String title,
+      String performerName,
       Boolean upcoming,
       EventStatus status,
       boolean adminView,
@@ -176,6 +177,14 @@ public class EventService {
             cb.like(
                 cb.lower(root.get("title")),
                 "%" + title.toLowerCase() + "%"));
+      }
+
+      if (performerName != null && !performerName.isBlank()) {
+        predicates.add(
+            cb.like(
+                cb.lower(root.join("performers", JoinType.LEFT).get("name")),
+                "%" + performerName.toLowerCase() + "%"));
+        query.distinct(true);
       }
 
       if (upcoming == null || upcoming) {

@@ -14,5 +14,9 @@ public record UpdateVenueRequest(
         @Schema(description = "Country")
         String country,
         @Schema(description = "Maximum seating capacity")
-        Integer capacity) {
+        Integer capacity,
+        @Schema(description = "Latitude (WGS84), optional", example = "40.750504")
+        Double latitude,
+        @Schema(description = "Longitude (WGS84), optional", example = "-73.993439")
+        Double longitude) {
 }
