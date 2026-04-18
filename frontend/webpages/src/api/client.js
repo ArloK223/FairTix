@@ -17,6 +17,20 @@ async function apiRequest(path, options = {}, isRetry = false) {
     credentials: 'include',
   });
 
+  if (response.status === 428) {
+    let action = 'UNKNOWN';
+    try {
+      const body = await response.clone().json();
+      action = body.action || action;
+    } catch (_) {}
+    window.dispatchEvent(new CustomEvent('auth:step-up-required', { detail: { action } }));
+    const error = new Error('Step-up verification required');
+    error.status = 428;
+    error.code = 'STEP_UP_REQUIRED';
+    error.action = action;
+    throw error;
+  }
+
   if ((response.status === 401 || response.status === 403) && !isRetry && path !== '/auth/refresh' && path !== '/auth/login') {
     if (!refreshPromise) {
       refreshPromise = fetch(API_BASE + '/auth/refresh', {

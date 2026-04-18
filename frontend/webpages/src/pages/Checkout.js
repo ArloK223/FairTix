@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../auth/useAuth';
+import Recaptcha from '../components/Recaptcha';
 import '../styles/Checkout.css';
 
 function Checkout() {
@@ -17,7 +18,13 @@ function Checkout() {
 
   const [cardNumber, setCardNumber] = useState('');
   const [paymentError, setPaymentError] = useState('');
-  const [paymentState, setPaymentState] = useState('form'); // form | processing | success | failed
+  const [paymentState, setPaymentState] = useState('form'); // form | processing | success | failed | step-up
+  const [stepUpAction, setStepUpAction] = useState(null);
+  const [stepUpCaptchaToken, setStepUpCaptchaToken] = useState('');
+  const [stepUpError, setStepUpError] = useState('');
+  const [stepUpSubmitting, setStepUpSubmitting] = useState(false);
+  const stepUpCaptchaRef = useRef(null);
+  const pendingPayloadRef = useRef(null);
   const [tick, setTick] = useState(0);
   const tickRef = useRef(null);
   const holdIdsRef = useRef(location.state?.holdIds || []);
@@ -83,6 +90,15 @@ function Checkout() {
     fetchConfirmedHolds();
   }, [fetchConfirmedHolds]);
 
+  useEffect(() => {
+    function onStepUpRequired(e) {
+      setStepUpAction(e.detail?.action || 'CHECKOUT');
+      setPaymentState('step-up');
+    }
+    window.addEventListener('auth:step-up-required', onStepUpRequired);
+    return () => window.removeEventListener('auth:step-up-required', onStepUpRequired);
+  }, []);
+
   function getSeatPrice(hold) {
     const seat = seatMap[hold.seatId];
     return seat?.price ?? 0;
@@ -97,31 +113,18 @@ function Checkout() {
     return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
   }
 
-  async function handlePayment(e) {
-    e.preventDefault();
-    const digits = cardNumber.replace(/\s/g, '');
-    if (digits.length < 16) {
-      setPaymentError('Please enter a valid 16-digit card number.');
-      return;
-    }
-
-    setPaymentError('');
+  async function submitPayload(payload) {
     setPaymentState('processing');
     setSubmitting(true);
-
-    // Determine simulated outcome based on card number
-    let simulatedOutcome = 'SUCCESS';
-    if (digits.startsWith('4000')) simulatedOutcome = 'FAILURE';
-    else if (digits.startsWith('4111')) simulatedOutcome = 'CANCELLED';
-
     try {
-      const result = await api.post('/api/payments/checkout', {
-        holdIds: holds.map((h) => h.id),
-        simulatedOutcome,
-      });
+      const result = await api.post('/api/payments/checkout', payload);
       setOrderResult(result);
       setPaymentState('success');
     } catch (err) {
+      if (err.status === 428) {
+        pendingPayloadRef.current = payload;
+        return;
+      }
       setPaymentState('failed');
       setPaymentError(
         err.body?.failureReason
@@ -130,6 +133,49 @@ function Checkout() {
       );
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handlePayment(e) {
+    e.preventDefault();
+    const digits = cardNumber.replace(/\s/g, '');
+    if (digits.length < 16) {
+      setPaymentError('Please enter a valid 16-digit card number.');
+      return;
+    }
+    setPaymentError('');
+
+    let simulatedOutcome = 'SUCCESS';
+    if (digits.startsWith('4000')) simulatedOutcome = 'FAILURE';
+    else if (digits.startsWith('4111')) simulatedOutcome = 'CANCELLED';
+
+    const payload = { holdIds: holds.map((h) => h.id), simulatedOutcome };
+    pendingPayloadRef.current = payload;
+    await submitPayload(payload);
+  }
+
+  async function handleStepUpSubmit(e) {
+    e.preventDefault();
+    if (!stepUpCaptchaToken) {
+      setStepUpError('Please complete the CAPTCHA.');
+      return;
+    }
+    setStepUpError('');
+    setStepUpSubmitting(true);
+    try {
+      await api.post('/auth/step-up/verify', { captchaToken: stepUpCaptchaToken });
+      setPaymentState('form');
+      setStepUpAction(null);
+      setStepUpCaptchaToken('');
+      if (pendingPayloadRef.current) {
+        await submitPayload(pendingPayloadRef.current);
+      }
+    } catch (err) {
+      setStepUpError(err.message || 'Verification failed. Please try again.');
+      if (stepUpCaptchaRef.current) stepUpCaptchaRef.current.reset();
+      setStepUpCaptchaToken('');
+    } finally {
+      setStepUpSubmitting(false);
     }
   }
 
@@ -317,6 +363,25 @@ function Checkout() {
           <span className="checkout-price">${total.toFixed(2)}</span>
         </div>
       </div>
+
+      {paymentState === 'step-up' && (
+        <div className="checkout-step-up-modal">
+          <h3>Additional Verification Required</h3>
+          <p>For your security, please complete the verification below before continuing your {stepUpAction === 'SEAT_HOLD' ? 'seat hold' : 'checkout'}.</p>
+          <form onSubmit={handleStepUpSubmit}>
+            {stepUpError && <div className="checkout-error">{stepUpError}</div>}
+            <Recaptcha ref={stepUpCaptchaRef} onChange={setStepUpCaptchaToken} />
+            <div className="checkout-actions">
+              <button type="button" className="checkout-btn-secondary" onClick={() => { setPaymentState('form'); setStepUpAction(null); }} disabled={stepUpSubmitting}>
+                Cancel
+              </button>
+              <button type="submit" className="checkout-btn-primary" disabled={stepUpSubmitting || !stepUpCaptchaToken}>
+                Verify &amp; Continue
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {paymentState === 'processing' && (
         <div className="checkout-processing">
