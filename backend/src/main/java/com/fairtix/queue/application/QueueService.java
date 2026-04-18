@@ -2,6 +2,8 @@ package com.fairtix.queue.application;
 
 import com.fairtix.audit.application.AuditService;
 import com.fairtix.common.ResourceNotFoundException;
+import com.fairtix.fraud.application.SuspiciousFlagService;
+import com.fairtix.fraud.application.UserFlaggedForAbuseException;
 import com.fairtix.events.domain.Event;
 import com.fairtix.events.infrastructure.EventRepository;
 import com.fairtix.inventory.domain.SeatStatus;
@@ -38,6 +40,7 @@ public class QueueService {
     private final TicketRepository ticketRepository;
     private final RedissonClient redissonClient;
     private final AuditService auditService;
+    private final SuspiciousFlagService suspiciousFlagService;
 
     @Value("${queue.admission-window-minutes:15}")
     private int admissionWindowMinutes;
@@ -50,13 +53,15 @@ public class QueueService {
                         SeatRepository seatRepository,
                         TicketRepository ticketRepository,
                         RedissonClient redissonClient,
-                        AuditService auditService) {
+                        AuditService auditService,
+                        SuspiciousFlagService suspiciousFlagService) {
         this.queueRepository = queueRepository;
         this.eventRepository = eventRepository;
         this.seatRepository = seatRepository;
         this.ticketRepository = ticketRepository;
         this.redissonClient = redissonClient;
         this.auditService = auditService;
+        this.suspiciousFlagService = suspiciousFlagService;
     }
 
     @Transactional
@@ -66,6 +71,10 @@ public class QueueService {
 
         if (!event.isQueueRequired()) {
             throw new IllegalArgumentException("This event does not require a queue");
+        }
+
+        if (suspiciousFlagService.hasActiveCriticalFlag(userId)) {
+            throw new UserFlaggedForAbuseException();
         }
 
         if (event.getMaxTicketsPerUser() != null) {

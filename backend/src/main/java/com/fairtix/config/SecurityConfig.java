@@ -1,6 +1,7 @@
 package com.fairtix.config;
 
 import com.fairtix.auth.application.JwtAuthenticationFilter;
+import com.fairtix.fraud.api.StepUpFilter;
 
 import java.util.List;
 
@@ -23,9 +24,11 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtFilter;
+  private final StepUpFilter stepUpFilter;
 
-  public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+  public SecurityConfig(JwtAuthenticationFilter jwtFilter, StepUpFilter stepUpFilter) {
     this.jwtFilter = jwtFilter;
+    this.stepUpFilter = stepUpFilter;
   }
 
   @Bean
@@ -67,7 +70,8 @@ public class SecurityConfig {
                 response.getWriter().write(
                     "{\"status\":401,\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication required\"}");
             }))
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(stepUpFilter, JwtAuthenticationFilter.class);
 
     return http.build();
   }
