@@ -1,29 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/client';
 import { useNearbyEvents } from '../hooks/useNearbyEvents';
 import '../styles/Events.css';
 
-function Events() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  return date.toLocaleString(undefined, {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
-  // Filters
-  const [titleSearch, setTitleSearch] = useState('');
-  const [venueSearch, setVenueSearch] = useState('');
-  const [performerSearch, setPerformerSearch] = useState('');
-  const [showPast, setShowPast] = useState(false);
-
-  // Pagination
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-
+function EventsNearYou() {
   const {
     coords,
-    geoSupported,
     geoLoading,
     geoError,
     showAddressFallback,
@@ -36,149 +29,38 @@ function Events() {
     geocodingError,
     geocoding,
     requestGeolocation,
-    clearCoords,
     handleAddressSearch,
-  } = useNearbyEvents({ autoRequest: false, autoFetch: false });
-
-  const nearMe = coords !== null;
-
-  const handleNearMeToggle = () => {
-    if (nearMe) {
-      clearCoords();
-      setPage(0);
-    } else {
-      requestGeolocation();
-    }
-  };
-
-  const fetchEvents = useCallback(() => {
-    setLoading(true);
-    setError('');
-
-    if (coords) {
-      const params = new URLSearchParams();
-      params.set('lat', coords.lat);
-      params.set('lon', coords.lon);
-      params.set('radiusKm', radiusKm);
-      params.set('page', page);
-      params.set('size', pageSize);
-      api.get(`/api/events/nearby?${params.toString()}`)
-        .then((data) => {
-          setEvents(data.content || []);
-          setTotalPages(data.page?.totalPages || 0);
-          setTotalElements(data.page?.totalElements || 0);
-        })
-        .catch((err) => {
-          setError(err.message || 'Failed to load nearby events');
-        })
-        .finally(() => setLoading(false));
-      return;
-    }
-
-    const params = new URLSearchParams();
-    params.set('page', page);
-    params.set('size', pageSize);
-    params.set('upcoming', !showPast);
-    if (titleSearch.trim()) params.set('title', titleSearch.trim());
-    if (venueSearch.trim()) params.set('venueName', venueSearch.trim());
-    if (performerSearch.trim()) params.set('performerName', performerSearch.trim());
-
-    api.get(`/api/events?${params.toString()}`)
-      .then((data) => {
-        setEvents(data.content || []);
-        setTotalPages(data.page?.totalPages || 0);
-        setTotalElements(data.page?.totalElements || 0);
-      })
-      .catch((err) => {
-        setError(err.message || 'Failed to load events');
-      })
-      .finally(() => setLoading(false));
-  }, [page, pageSize, titleSearch, venueSearch, performerSearch, showPast, coords, radiusKm]);
-
-  const handleSearchChange = (setter) => (e) => {
-    setter(e.target.value);
-    setPage(0);
-  };
-
-  const handleShowPastToggle = () => {
-    setShowPast((prev) => !prev);
-    setPage(0);
-  };
+    events,
+    loading,
+    error,
+    page, setPage,
+    pageSize, setPageSize,
+    totalPages,
+    totalElements,
+  } = useNearbyEvents({ autoRequest: true });
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
     setPage(0);
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchEvents();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [fetchEvents]);
-
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return date.toLocaleString(undefined, {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   return (
     <div className="events-page">
-      <h2>Events</h2>
+      <h2>Events Near You</h2>
 
-      <div className="events-filters">
-        <input
-          type="text"
-          placeholder="Search by title..."
-          value={titleSearch}
-          onChange={handleSearchChange(setTitleSearch)}
-          className="filter-input"
-        />
-        <input
-          type="text"
-          placeholder="Filter by venue..."
-          value={venueSearch}
-          onChange={handleSearchChange(setVenueSearch)}
-          className="filter-input"
-        />
-        <input
-          type="text"
-          placeholder="Filter by performer..."
-          value={performerSearch}
-          onChange={handleSearchChange(setPerformerSearch)}
-          className="filter-input"
-        />
-        <label className="filter-toggle">
-          <input
-            type="checkbox"
-            checked={showPast}
-            onChange={handleShowPastToggle}
-          />
-          Show past events
-        </label>
-        {geoSupported && (
-          <button
-            className={`filter-toggle-btn${nearMe ? ' filter-toggle-btn--active' : ''}`}
-            onClick={handleNearMeToggle}
-            type="button"
-            disabled={geoLoading}
-          >
-            {geoLoading ? 'Detecting…' : nearMe ? 'Near Me (on)' : 'Near Me'}
-          </button>
-        )}
-      </div>
+      {geoLoading && (
+        <div className="events-empty">
+          <p>Detecting your location&hellip;</p>
+        </div>
+      )}
+
       {geoError && <div className="error-message">{geoError}</div>}
 
       {showAddressFallback && (
         <div className="city-fallback">
-          <p className="city-fallback-title">Location access denied. Enter your address to find events nearby.</p>
+          <p className="city-fallback-title">
+            Location access denied. Enter your address to find events nearby.
+          </p>
           <div className="city-fallback-form">
             <div className="address-field address-field--full">
               <label>Street address <span className="address-optional">(optional)</span></label>
@@ -259,11 +141,34 @@ function Events() {
               type="button"
               onClick={handleAddressSearch}
               disabled={geocoding || (!cityInput.trim() && !zipInput.trim())}
-              className="filter-toggle-btn address-search-btn"
+              className="address-search-btn"
             >
               {geocoding ? 'Searching...' : 'Search Nearby'}
             </button>
           </div>
+        </div>
+      )}
+
+      {coords && !showAddressFallback && (
+        <div className="events-filters">
+          <label htmlFor="near-you-radius" style={{ fontSize: '0.9rem', color: '#555', whiteSpace: 'nowrap' }}>
+            Radius:
+          </label>
+          <select
+            id="near-you-radius"
+            value={radiusKm}
+            onChange={(e) => { setRadiusKm(Number(e.target.value)); setPage(0); }}
+            className="page-size-select address-radius-select"
+          >
+            <option value={10}>10 km</option>
+            <option value={25}>25 km</option>
+            <option value={50}>50 km</option>
+            <option value={100}>100 km</option>
+            <option value={200}>200 km</option>
+          </select>
+          <button type="button" onClick={requestGeolocation} className="address-search-btn">
+            Re-detect location
+          </button>
         </div>
       )}
 
@@ -278,11 +183,12 @@ function Events() {
           ))}
         </div>
       )}
+
       {error && <div className="error-message">{error}</div>}
 
-      {!loading && !error && events.length === 0 && (
+      {!loading && !error && coords && events.length === 0 && (
         <div className="events-empty">
-          <p>No events match your search.</p>
+          <p>No events found within {radiusKm} km of your location.</p>
         </div>
       )}
 
@@ -295,7 +201,7 @@ function Events() {
                 <div className="event-card-meta">
                   <span>{event.venue?.name ?? ''}</span>
                   <span>{formatDate(event.startTime)}</span>
-                  {nearMe && event.distanceKm != null && (
+                  {event.distanceKm != null && (
                     <span>{event.distanceKm.toFixed(1)} km away</span>
                   )}
                 </div>
@@ -321,9 +227,7 @@ function Events() {
               >
                 Previous
               </button>
-              <span className="pagination-page">
-                Page {page + 1} of {totalPages}
-              </span>
+              <span className="pagination-page">Page {page + 1} of {totalPages}</span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
@@ -343,4 +247,4 @@ function Events() {
   );
 }
 
-export default Events;
+export default EventsNearYou;

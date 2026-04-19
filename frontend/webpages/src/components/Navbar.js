@@ -13,6 +13,7 @@ function Navbar() {
       </div>
       <div className="navbar-links">
         <NavLink to="/events">Events</NavLink>
+        <NavLink to="/events/near-me">Near Me</NavLink>
 
         {!user && (
           <>

@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Events from './pages/Events';
+import EventsNearYou from './pages/EventsNearYou';
 import EventDetail from './pages/EventDetail';
 import Dashboard from './pages/Dashboard';
 import MyTickets from './pages/MyTickets';
@@ -56,6 +57,7 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/events/near-me" element={<EventsNearYou />} />
               <Route path="/events/:eventId" element={<EventDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
