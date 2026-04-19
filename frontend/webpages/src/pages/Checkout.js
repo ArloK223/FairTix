@@ -73,6 +73,7 @@ function Checkout() {
   const [stepUpError, setStepUpError] = useState('');
   const [stepUpSubmitting, setStepUpSubmitting] = useState(false);
   const stepUpCaptchaRef = useRef(null);
+  const stepUpModalRef = useRef(null);
   const pendingPayloadRef = useRef(null);
   const [tick, setTick] = useState(0);
   const tickRef = useRef(null);
@@ -157,6 +158,12 @@ function Checkout() {
     window.addEventListener('auth:step-up-required', onStepUpRequired);
     return () => window.removeEventListener('auth:step-up-required', onStepUpRequired);
   }, []);
+
+  useEffect(() => {
+    if (paymentState === 'step-up' && stepUpModalRef.current) {
+      stepUpModalRef.current.focus();
+    }
+  }, [paymentState]);
 
   function getSeatPrice(hold) {
     const seat = seatMap[hold.seatId];
@@ -430,8 +437,15 @@ function Checkout() {
       </div>
 
       {paymentState === 'step-up' && (
-        <div className="checkout-step-up-modal">
-          <h3>Additional Verification Required</h3>
+        <div
+          className="checkout-step-up-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="step-up-title"
+          ref={stepUpModalRef}
+          tabIndex={-1}
+        >
+          <h3 id="step-up-title">Additional Verification Required</h3>
           <p>For your security, please complete the verification below before continuing your {stepUpAction === 'SEAT_HOLD' ? 'seat hold' : 'checkout'}.</p>
           <form onSubmit={handleStepUpSubmit}>
             {stepUpError && <div className="checkout-error">{stepUpError}</div>}
@@ -441,7 +455,7 @@ function Checkout() {
                 Cancel
               </button>
               <button type="submit" className="checkout-btn-primary" disabled={stepUpSubmitting || !stepUpCaptchaToken}>
-                Verify &amp; Continue
+                {stepUpSubmitting ? 'Verifying…' : 'Verify & Continue'}
               </button>
             </div>
           </form>
