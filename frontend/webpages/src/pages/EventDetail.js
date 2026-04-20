@@ -5,7 +5,6 @@ import api from '../api/client';
 import '../styles/EventDetail.css';
 
 const MAX_SEATS_PER_HOLD = 10;
-const POLL_INTERVAL_MS = 10000;
 
 function groupSeatsBySection(seats) {
   const groups = {};
@@ -203,11 +202,6 @@ function EventDetail() {
         <div className="event-detail-meta">
           <span>{event.venue}</span>
           <span>{new Date(event.startTime).toLocaleString()}</span>
-          {event.thumbnail && (
-            <a href={event.thumbnail} target="_blank" rel="noreferrer" className="event-detail-thumbnail-link">
-              {event.thumbnail}
-            </a>
-          )}
         </div>
       </div>
 

@@ -59,7 +59,8 @@ class EventControllerTest {
         {
           "title":     "Test Concert",
           "startTime": "2026-06-15T19:00:00Z",
-          "venue":     "Main Arena"
+          "venue":     "Main Arena",
+          "thumbnail": "https://cdn.example.com/thumb.jpg"
         }
         """;
 
@@ -72,6 +73,7 @@ class EventControllerTest {
         .andExpect(jsonPath("$.title").value("Test Concert"))
         .andExpect(jsonPath("$.venue").value("Main Arena"))
         .andExpect(jsonPath("$.startTime").value("2026-06-15T19:00:00Z"))
+        .andExpect(jsonPath("$.thumbnail").value("https://cdn.example.com/thumb.jpg"))
         .andExpect(jsonPath("$.organizerId").value(ADMIN_ID.toString()));
   }
 
@@ -114,20 +116,25 @@ class EventControllerTest {
 
   @Test
   void listEvents_unauthenticated_returns200() throws Exception {
-    eventService.createEvent("Event 1", Instant.parse("2026-06-01T18:00:00Z"), "Venue A", null);
+    eventService.createEvent(
+        "Event 1",
+        Instant.parse("2026-06-01T18:00:00Z"),
+        "Venue A",
+        "https://cdn.example.com/event-1.jpg");
 
     mockMvc.perform(get("/api/events"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content").isArray())
         .andExpect(jsonPath("$.content", hasSize(1)))
-        .andExpect(jsonPath("$.content[0].title").value("Event 1"));
+        .andExpect(jsonPath("$.content[0].title").value("Event 1"))
+        .andExpect(jsonPath("$.content[0].thumbnail").value("https://cdn.example.com/event-1.jpg"));
   }
 
   @Test
   void listEvents_pagination_works() throws Exception {
-    eventService.createEvent("Event A", Instant.parse("2026-06-01T18:00:00Z"), "Venue A", null);
-    eventService.createEvent("Event B", Instant.parse("2026-06-02T18:00:00Z"), "Venue B", null);
-    eventService.createEvent("Event C", Instant.parse("2026-06-03T18:00:00Z"), "Venue C", null);
+    eventService.createEvent("Event A", Instant.parse("2026-06-01T18:00:00Z"), "Venue A");
+    eventService.createEvent("Event B", Instant.parse("2026-06-02T18:00:00Z"), "Venue B");
+    eventService.createEvent("Event C", Instant.parse("2026-06-03T18:00:00Z"), "Venue C");
 
     mockMvc.perform(get("/api/events")
             .param("page", "0")
@@ -145,13 +152,18 @@ class EventControllerTest {
 
   @Test
   void getEvent_existingId_returns200() throws Exception {
-    Event event = eventService.createEvent("My Event", Instant.parse("2026-07-01T20:00:00Z"), "Stadium", null);
+    Event event = eventService.createEvent(
+        "My Event",
+        Instant.parse("2026-07-01T20:00:00Z"),
+        "Stadium",
+        "https://cdn.example.com/my-event.jpg");
 
     mockMvc.perform(get("/api/events/{id}", event.getId()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(event.getId().toString()))
         .andExpect(jsonPath("$.title").value("My Event"))
-        .andExpect(jsonPath("$.venue").value("Stadium"));
+        .andExpect(jsonPath("$.venue").value("Stadium"))
+        .andExpect(jsonPath("$.thumbnail").value("https://cdn.example.com/my-event.jpg"));
   }
 
   @Test

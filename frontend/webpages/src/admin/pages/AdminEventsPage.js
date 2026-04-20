@@ -183,7 +183,22 @@ function AdminEventsPage() {
                   <TableCell>{formatDate(event.startTime)}</TableCell>
                   <TableCell>
                     {event.thumbnail ? (
-                      <a href={event.thumbnail} target="_blank" rel="noreferrer">{event.thumbnail}</a>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          component="img"
+                          src={event.thumbnail}
+                          alt={`${event.title} thumbnail`}
+                          sx={{
+                            width: 72,
+                            height: 44,
+                            objectFit: 'cover',
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                          }}
+                        />
+                        <a href={event.thumbnail} target="_blank" rel="noreferrer">Open</a>
+                      </Box>
                     ) : (
                       '-'
                     )}

@@ -143,7 +143,6 @@ function Events() {
                 <div className="event-card-meta">
                   <span>{event.venue}</span>
                   <span>{formatDate(event.startTime)}</span>
-                  {event.thumbnail && <span className="event-thumbnail-url">{event.thumbnail}</span>}
                 </div>
                 <div className="event-card-action">View details &rarr;</div>
               </Link>

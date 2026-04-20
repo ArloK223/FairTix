@@ -68,7 +68,7 @@ class SecurityAcceptanceTest {
     adminUser = userRepository.save(adminUser);
 
     testEvent = eventRepository.save(
-        new Event("Security Test Event", "Test Venue", Instant.now().plusSeconds(86400), (UUID) null));
+        new Event("Security Test Event", "Test Venue", Instant.now().plusSeconds(86400), null, (UUID) null));
   }
 
   @Nested

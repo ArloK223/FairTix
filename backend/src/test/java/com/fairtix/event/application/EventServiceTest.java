@@ -54,11 +54,12 @@ class EventServiceTest {
         "New Event",
         Instant.now().plusSeconds(7200),
         "New Venue",
-        null);
+        "https://cdn.example.com/new-event.jpg");
 
     assertThat(event.getId()).isNotNull();
     assertThat(event.getTitle()).isEqualTo("New Event");
     assertThat(event.getVenue()).isEqualTo("New Venue");
+    assertThat(event.getThumbnail()).isEqualTo("https://cdn.example.com/new-event.jpg");
   }
 
   // -------------------------------------------------------------------------
@@ -89,16 +90,18 @@ class EventServiceTest {
   // -------------------------------------------------------------------------
 
   @Test
-  void updatingEventChangesTitleAndStartTime() {
+  void updatingEventChangesTitleStartTimeAndThumbnail() {
 
     Instant newStart = Instant.now().plusSeconds(7200);
+    String newThumbnail = "https://cdn.example.com/updated-event.jpg";
 
-    UpdateEventRequest request = new UpdateEventRequest("Updated Event", newStart);
+    UpdateEventRequest request = new UpdateEventRequest("Updated Event", newStart, newThumbnail);
 
     Event updated = eventService.update(testEvent.getId(), request, null);
 
     assertThat(updated.getTitle()).isEqualTo("Updated Event");
     assertThat(updated.getStartTime()).isEqualTo(newStart);
+    assertThat(updated.getThumbnail()).isEqualTo(newThumbnail);
   }
 
   @Test
