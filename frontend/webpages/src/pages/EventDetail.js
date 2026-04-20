@@ -147,7 +147,7 @@ function EventDetail() {
     try {
       const [eventData, seatsData] = await Promise.all([
         api.get(`/api/events/${eventId}`),
-        api.get(`/api/events/${eventId}/seats`),
+        api.get(`/api/events/${eventId}/seats/map`),
       ]);
       setEvent(eventData);
       if (user && eventData.maxTicketsPerUser != null) {
