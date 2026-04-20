@@ -31,6 +31,8 @@ import AdminSupportPage from './admin/pages/AdminSupportPage';
 import AdminFraudPage from './admin/pages/AdminFraudPage';
 import AdminPerformersPage from './admin/pages/AdminPerformersPage';
 import MyRefunds from './pages/MyRefunds';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import TicketDetailPage from './pages/TicketDetailPage';
 import MySupportTickets from './pages/MySupportTickets';
 import SupportPage from './pages/SupportPage';
 import SupportTicketDetail from './pages/SupportTicketDetail';
@@ -72,6 +74,8 @@ function App() {
                 <Route path="/my-holds" element={<MyHolds />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/my-tickets" element={<MyTickets />} />
+                <Route path="/my-tickets/:ticketId" element={<TicketDetailPage />} />
+                <Route path="/order-history" element={<OrderHistoryPage />} />
                 <Route path="/transfers" element={<TransferRequests />} />
                 <Route path="/refunds" element={<MyRefunds />} />
                 <Route path="/support" element={<MySupportTickets />} />

@@ -364,4 +364,17 @@ public class OrderService {
   public List<Order> listOrders(UUID userId) {
     return orderRepository.findAllByUser_IdOrderByCreatedAtDesc(userId);
   }
+
+  public List<com.fairtix.orders.dto.OrderResponse> listOrdersWithDetails(UUID userId) {
+    return orderRepository.findAllByUser_IdOrderByCreatedAtDesc(userId).stream()
+        .map(order -> com.fairtix.orders.dto.OrderResponse.withDetails(
+            order, ticketRepository.findAllByOrder_Id(order.getId())))
+        .toList();
+  }
+
+  public com.fairtix.orders.dto.OrderResponse getOrderWithDetails(UUID orderId, UUID userId) {
+    Order order = getOrder(orderId, userId);
+    return com.fairtix.orders.dto.OrderResponse.withDetails(
+        order, ticketRepository.findAllByOrder_Id(orderId));
+  }
 }
