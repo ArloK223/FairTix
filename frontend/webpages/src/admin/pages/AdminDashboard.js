@@ -12,6 +12,7 @@ import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import PanToolIcon from '@mui/icons-material/PanTool';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PercentIcon from '@mui/icons-material/Percent';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import StatsCard from '../components/StatsCard';
 import SeatStatusChart from '../components/SeatStatusChart';
 import HoldStatusChart from '../components/HoldStatusChart';
@@ -19,6 +20,9 @@ import TopEventsChart from '../components/TopEventsChart';
 import HoldsOverTimeChart from '../components/HoldsOverTimeChart';
 import EventsByVenueChart from '../components/EventsByVenueChart';
 import UsersByRoleChart from '../components/UsersByRoleChart';
+import RevenueOverTimeChart from '../components/RevenueOverTimeChart';
+import TicketsSoldChart from '../components/TicketsSoldChart';
+import RefundsOverTimeChart from '../components/RefundsOverTimeChart';
 import api from '../../api/client';
 
 function AdminDashboard() {
@@ -84,6 +88,14 @@ function AdminDashboard() {
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <StatsCard title="Sold Seats" value={overview.soldSeats} icon={<ShoppingCartIcon />} color="#2196f3" />
         </Grid>
+        <Grid item xs={12} sm={6} md={4} lg={4}>
+          <StatsCard
+            title="Total Revenue"
+            value={`$${(data.totalRevenue || 0).toFixed(2)}`}
+            icon={<AttachMoneyIcon />}
+            color="#4caf50"
+          />
+        </Grid>
       </Grid>
 
       {/* Row 2: Seat & Hold Status Pies */}
@@ -114,7 +126,7 @@ function AdminDashboard() {
       </Grid>
 
       {/* Row 5: Confirmation Rate & Users by Role */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={4}>
           <StatsCard
             title="Hold Confirmation Rate"
@@ -125,6 +137,23 @@ function AdminDashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={8}>
           <UsersByRoleChart data={data.usersByRole} />
+        </Grid>
+      </Grid>
+
+      {/* Row 6: Revenue Over Time */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12}>
+          <RevenueOverTimeChart data={data.revenuePerDay} />
+        </Grid>
+      </Grid>
+
+      {/* Row 7: Tickets Sold & Refunds Over Time */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <TicketsSoldChart data={data.ticketsSoldPerDay} />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <RefundsOverTimeChart data={data.refundsPerDay} />
         </Grid>
       </Grid>
     </Box>
