@@ -6,6 +6,7 @@ import com.fairtix.venues.dto.CreateVenueSectionRequest;
 import com.fairtix.venues.dto.UpdateVenueSectionRequest;
 import com.fairtix.venues.infrastructure.VenueSectionRepository;
 import com.fairtix.venues.infrastructure.VenueRepository;
+import com.fairtix.common.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class VenueSectionService {
 
   public List<VenueSection> getSections(UUID venueId) {
     if (!venueRepository.existsById(venueId)) {
-      throw new IllegalArgumentException("Venue not found: " + venueId);
+      throw new ResourceNotFoundException("Venue not found: " + venueId);
     }
     return sectionRepository.findByVenue_Id(venueId);
   }
@@ -57,7 +58,7 @@ public class VenueSectionService {
       UpdateVenueSectionRequest request, UUID userId) {
 
     var section = sectionRepository.findById(sectionId)
-        .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionId));
+        .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + sectionId));
 
     if (!section.getVenue().getId().equals(venueId)) {
       throw new IllegalArgumentException(
@@ -80,7 +81,7 @@ public class VenueSectionService {
 
   public void deleteSection(UUID venueId, UUID sectionId, UUID userId) {
     var section = sectionRepository.findById(sectionId)
-        .orElseThrow(() -> new IllegalArgumentException("Section not found: " + sectionId));
+        .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + sectionId));
 
     if (!section.getVenue().getId().equals(venueId)) {
       throw new IllegalArgumentException(

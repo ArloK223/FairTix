@@ -102,6 +102,9 @@ public class SeatService {
     for (SeatPositionUpdate update : updates) {
       Seat seat = seatRepository.findById(update.id())
           .orElseThrow(() -> new EntityNotFoundException("Seat not found: " + update.id()));
+      if (!seat.getEvent().getId().equals(eventId)) {
+        throw new IllegalArgumentException("Seat " + update.id() + " does not belong to event " + eventId);
+      }
       seat.setPosX(update.posX());
       seat.setPosY(update.posY());
       seat.setRotation(update.rotation());

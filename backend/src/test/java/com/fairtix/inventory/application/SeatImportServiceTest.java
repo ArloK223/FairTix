@@ -44,7 +44,7 @@ class SeatImportServiceTest {
         event = mock(Event.class);
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
         when(seatRepository.findByEvent_Id(eventId)).thenReturn(List.of());
-        when(seatRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+        lenient().when(seatRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
