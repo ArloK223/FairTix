@@ -140,7 +140,7 @@ public class SupportTicketService {
 
     public Page<SupportTicketResponse> getUserTickets(UUID userId, int page) {
         PageRequest pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        return ticketRepository.findByUserId(userId, pageable)
+        return ticketRepository.findByUser_Id(userId, pageable)
                 .map(SupportTicketResponse::summary);
     }
 
