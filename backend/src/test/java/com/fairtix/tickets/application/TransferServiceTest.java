@@ -3,6 +3,7 @@ package com.fairtix.tickets.application;
 import com.fairtix.audit.application.AuditService;
 import com.fairtix.common.ResourceNotFoundException;
 import com.fairtix.fraud.application.RiskScoringService;
+import com.fairtix.fraud.application.UserFlaggedForAbuseException;
 import com.fairtix.fraud.domain.RiskTier;
 import com.fairtix.notifications.application.EmailService;
 import com.fairtix.notifications.application.EmailTemplateService;
@@ -65,8 +66,7 @@ class TransferServiceTest {
 
         assertThatThrownBy(() ->
                 transferService.createTransferRequest(TICKET_ID, USER_ID, "other@example.com"))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("blocked due to account risk level");
+                .isInstanceOf(UserFlaggedForAbuseException.class);
 
         verify(auditService).log(eq(USER_ID), eq("TRANSFER_BLOCKED_FRAUD_RISK"),
                 anyString(), any(), anyString());

@@ -41,14 +41,12 @@ class QueueSseServiceTest {
     void broadcastSendsStatusToConnectedEmitter() throws Exception {
         QueueEntry entry = mockWaitingEntry();
         when(queueService.getStatus(EVENT_ID, USER_ID)).thenReturn(entry);
-        when(queueService.countWaiting(EVENT_ID)).thenReturn(3L);
 
         SseEmitter emitter = sseService.register(EVENT_ID, USER_ID);
         assertThat(emitter).isNotNull();
 
         reset(queueService);
         when(queueService.getStatus(EVENT_ID, USER_ID)).thenReturn(entry);
-        when(queueService.countWaiting(EVENT_ID)).thenReturn(2L);
 
         sseService.broadcast(EVENT_ID);
 
@@ -59,7 +57,6 @@ class QueueSseServiceTest {
     void broadcastRemovesDeadEmitterOnError() {
         QueueEntry entry = mockWaitingEntry();
         when(queueService.getStatus(EVENT_ID, USER_ID)).thenReturn(entry);
-        when(queueService.countWaiting(EVENT_ID)).thenReturn(1L);
 
         sseService.register(EVENT_ID, USER_ID);
 
@@ -79,13 +76,12 @@ class QueueSseServiceTest {
     void registerSendsInitialStatusImmediately() {
         QueueEntry entry = mockWaitingEntry();
         when(queueService.getStatus(EVENT_ID, USER_ID)).thenReturn(entry);
-        when(queueService.countWaiting(EVENT_ID)).thenReturn(5L);
 
         SseEmitter emitter = sseService.register(EVENT_ID, USER_ID);
 
         assertThat(emitter).isNotNull();
         verify(queueService).getStatus(EVENT_ID, USER_ID);
-        verify(queueService).countWaiting(EVENT_ID);
+        verifyNoMoreInteractions(queueService);
     }
 
     private QueueEntry mockWaitingEntry() {
