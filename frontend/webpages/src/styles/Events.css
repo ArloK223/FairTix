@@ -269,6 +269,11 @@
   color: #2e7d32;
 }
 
+.event-card-status--cap {
+  background: #fff3e0;
+  color: #e65100;
+}
+
 /* City/address fallback form */
 .city-fallback {
   background: #f8f9fa;

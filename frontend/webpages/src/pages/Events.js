@@ -305,6 +305,11 @@ function Events() {
                 {event.status === 'ACTIVE' && (
                   <div className="event-card-status event-card-status--active">On Sale</div>
                 )}
+                {event.maxTicketsPerUser && (
+                  <div className="event-card-status event-card-status--cap">
+                    Limit: {event.maxTicketsPerUser} per person
+                  </div>
+                )}
                 <div className="event-card-action">View details &rarr;</div>
               </Link>
             ))}
