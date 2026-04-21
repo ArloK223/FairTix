@@ -30,14 +30,15 @@
   },
   "proxy": "http://localhost:8080",
   "jest": {
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(react-leaflet|@react-leaflet)/)"
-    ],
+    "moduleNameMapper": {
+      "^react-leaflet$": "<rootDir>/src/__mocks__/react-leaflet.js"
+    },
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",
       "!src/index.js",
       "!src/reportWebVitals.js",
-      "!src/setupTests.js"
+      "!src/setupTests.js",
+      "!src/__mocks__/**"
     ],
     "coverageThreshold": {
       "global": {
