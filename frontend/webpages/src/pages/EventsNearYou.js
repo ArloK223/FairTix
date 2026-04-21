@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -24,6 +25,7 @@ function formatDate(isoString) {
 }
 
 function EventsNearYou() {
+  useEffect(() => { document.title = 'Events Near You | FairTix'; }, []);
   const navigate = useNavigate();
   const {
     coords,

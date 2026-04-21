@@ -12,6 +12,7 @@ const STATUS_LABELS = {
 };
 
 function MyRefunds() {
+  useEffect(() => { document.title = 'My Refunds | FairTix'; }, []);
   const [refunds, setRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

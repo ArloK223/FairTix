@@ -19,16 +19,18 @@
 
 .filter-input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 0.9rem;
   flex: 1;
   min-width: 180px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
 }
 
 .filter-input:focus {
   outline: none;
-  border-color: #1a73e8;
+  border-color: var(--info);
   box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.15);
 }
 
@@ -37,15 +39,15 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .filter-toggle-btn {
   background: none;
-  border: 1px solid #5f6368;
-  color: #5f6368;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
   border-radius: 4px;
   padding: 0.4rem 0.9rem;
   font-size: 0.9rem;
@@ -55,17 +57,17 @@
 }
 
 .filter-toggle-btn:hover:not(:disabled) {
-  background: #f1f3f4;
+  background: var(--surface);
 }
 
 .filter-toggle-btn--active {
-  background: #e8f0fe;
-  border-color: #1a73e8;
-  color: #1a73e8;
+  background: var(--info-bg);
+  border-color: var(--info);
+  color: var(--info);
 }
 
 .filter-toggle-btn--active:hover {
-  background: #d2e3fc;
+  background: var(--info-bg);
 }
 
 .filter-toggle-btn:disabled {
@@ -84,16 +86,16 @@
   display: block;
   text-decoration: none;
   color: inherit;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1.25rem;
-  background: #fff;
+  background: var(--surface-raised);
   transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .event-card:hover {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  border-color: #bbb;
+  border-color: var(--text-muted);
 }
 
 .event-card h3 {
@@ -106,40 +108,28 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .event-card-action {
   margin-top: 0.75rem;
   font-size: 0.85rem;
-  color: #1a73e8;
+  color: var(--info);
   font-weight: 500;
 }
 
 .events-empty {
   text-align: center;
   padding: 3rem 1rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
-/* Skeleton loading */
-@keyframes skeleton-pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 0.3; }
-  100% { opacity: 0.6; }
-}
-
+/* Skeleton loading — .skeleton-line comes from _utilities.css */
 .event-card-skeleton {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1.25rem;
-  background: #fff;
-}
-
-.skeleton-line {
-  background: #e0e0e0;
-  border-radius: 4px;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  background: var(--surface-raised);
 }
 
 .skeleton-title {
@@ -160,40 +150,6 @@
   margin-top: 0.75rem;
 }
 
-/* Filters */
-.events-filters {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.filter-input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  flex: 1;
-  min-width: 180px;
-}
-
-.filter-input:focus {
-  outline: none;
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.15);
-}
-
-.filter-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.9rem;
-  color: #555;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
 /* Pagination */
 .events-pagination {
   margin-top: 1.5rem;
@@ -206,7 +162,7 @@
 
 .pagination-info {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-muted);
 }
 
 .pagination-controls {
@@ -217,16 +173,17 @@
 
 .pagination-controls button {
   padding: 0.4rem 0.8rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--surface-raised);
   cursor: pointer;
   font-size: 0.85rem;
+  color: var(--text-primary);
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background: #f5f5f5;
-  border-color: #999;
+  background: var(--surface);
+  border-color: var(--text-muted);
 }
 
 .pagination-controls button:disabled {
@@ -236,16 +193,17 @@
 
 .pagination-page {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-secondary);
   padding: 0 0.25rem;
 }
 
 .page-size-select {
   padding: 0.35rem 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 0.85rem;
-  background: #fff;
+  background: var(--surface-raised);
+  color: var(--text-primary);
 }
 
 .event-card-status {
@@ -260,13 +218,13 @@
 }
 
 .event-card-status--announced {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--info-bg);
+  color: var(--info-hover);
 }
 
 .event-card-status--active {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--success-bg);
+  color: var(--success-dark);
 }
 
 .event-card-status--cap {
@@ -276,8 +234,8 @@
 
 /* City/address fallback form */
 .city-fallback {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
@@ -287,7 +245,7 @@
 .city-fallback-title {
   margin: 0 0 1rem;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .city-fallback-form {
@@ -321,12 +279,12 @@
 .address-field label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .address-optional {
   font-weight: 400;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .address-field .filter-input {
@@ -347,7 +305,7 @@
 /* Nearby events map */
 .nearby-map-container {
   margin-bottom: 1.5rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -373,8 +331,8 @@
 .nearby-map-popup-btn {
   margin-top: 0.5rem;
   padding: 0.3rem 0.6rem;
-  background: #1a73e8;
-  color: #fff;
+  background: var(--info);
+  color: var(--text-on-brand);
   border: none;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -383,5 +341,19 @@
 }
 
 .nearby-map-popup-btn:hover {
-  background: #1558b0;
+  background: var(--info-hover);
+}
+
+@media (max-width: 768px) {
+  .events-page {
+    padding: 1rem;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nearby-map {
+    height: 280px;
+  }
 }

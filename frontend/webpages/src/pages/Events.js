@@ -17,6 +17,7 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 }
 
 function Events() {
+  useEffect(() => { document.title = 'Browse Events | FairTix'; }, []);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

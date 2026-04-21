@@ -55,6 +55,7 @@ function StripeCardForm({ holds, total, clientSecret, onSuccess, onError, onCanc
 }
 
 function Checkout() {
+  useEffect(() => { document.title = 'Checkout | FairTix'; }, []);
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();

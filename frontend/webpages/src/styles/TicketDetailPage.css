@@ -9,7 +9,7 @@
 }
 
 .ticket-detail-back-link {
-  color: #1a73e8;
+  color: var(--info);
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -19,11 +19,11 @@
 }
 
 .ticket-detail-card {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1.75rem;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sm);
 }
 
 .ticket-detail-header {
@@ -32,7 +32,7 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--surface);
 }
 
 .ticket-detail-header h2 {
@@ -42,7 +42,7 @@
 
 .ticket-detail-venue {
   margin: 0;
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -62,7 +62,7 @@
 
 .ticket-detail-section {
   padding-bottom: 1rem;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--surface);
 }
 
 .ticket-detail-section:last-child {
@@ -75,7 +75,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .ticket-detail-row {
@@ -83,7 +83,7 @@
   flex-direction: column;
   gap: 0.1rem;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
@@ -92,7 +92,7 @@
 }
 
 .ticket-detail-row .label {
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -105,7 +105,7 @@
 .ticket-detail-id {
   font-family: monospace;
   font-size: 0.82rem;
-  color: #555;
+  color: var(--text-secondary);
   word-break: break-all;
 }
 
@@ -120,23 +120,23 @@
 .ticket-detail-qr-img {
   width: 180px;
   height: 180px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 6px;
 }
 
 .ticket-detail-actions {
   padding-top: 1.25rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--surface);
 }
 
-/* Skeleton */
+/* Skeleton — .skeleton-line comes from _utilities.css */
 .ticket-detail-skeleton {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   padding: 2rem;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -153,7 +153,7 @@
 .ticket-detail-error {
   text-align: center;
   padding: 3rem 1rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
 @media (max-width: 600px) {

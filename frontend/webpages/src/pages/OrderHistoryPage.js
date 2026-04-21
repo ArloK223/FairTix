@@ -11,6 +11,7 @@ const STATUS_LABELS = {
 };
 
 function OrderHistoryPage() {
+  useEffect(() => { document.title = 'Order History | FairTix'; }, []);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

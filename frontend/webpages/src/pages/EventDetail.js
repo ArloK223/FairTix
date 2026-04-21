@@ -36,6 +36,9 @@ function EventDetail() {
   const { eventId } = useParams();
   const { user } = useAuth();
   const [event, setEvent] = useState(null);
+  useEffect(() => {
+    document.title = event ? `${event.title} | FairTix` : 'Event Details | FairTix';
+  }, [event]);
   const [seats, setSeats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

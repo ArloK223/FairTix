@@ -7,6 +7,7 @@ import '../styles/MyTickets.css';
 import '../styles/TicketDetailPage.css';
 
 function TicketDetailPage() {
+  useEffect(() => { document.title = 'Ticket Details | FairTix'; }, []);
   const { ticketId } = useParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);

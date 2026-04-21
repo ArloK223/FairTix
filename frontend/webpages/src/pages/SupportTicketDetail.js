@@ -20,6 +20,7 @@ const STATUS_CLASS = {
 };
 
 function SupportTicketDetail() {
+  useEffect(() => { document.title = 'Support Ticket | FairTix'; }, []);
   const { id } = useParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
