@@ -156,11 +156,10 @@ class GeoSearchServiceImplTest {
         UUID venueB = UUID.randomUUID();
         UUID venueC = UUID.randomUUID();
 
-        when(venueRepository.findVenuesWithinRadius(0, 0, 100)).thenReturn(List.of(
-            venueDistance(venueA, 50.0),
-            venueDistance(venueB, 10.0),
-            venueDistance(venueC, 30.0)
-        ));
+        VenueDistance vdA = venueDistance(venueA, 50.0);
+        VenueDistance vdB = venueDistance(venueB, 10.0);
+        VenueDistance vdC = venueDistance(venueC, 30.0);
+        when(venueRepository.findVenuesWithinRadius(0, 0, 100)).thenReturn(List.of(vdA, vdB, vdC));
 
         Event eA = event(venueA, EventStatus.ACTIVE);
         Event eB = event(venueB, EventStatus.ACTIVE);
