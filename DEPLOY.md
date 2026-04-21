@@ -58,6 +58,8 @@ All backend variables are loaded from `.env` at the project root. Frontend varia
 | `STRIPE_ENABLED` | No | `false` | Enable Stripe payments | See `docs/stripe-setup.md` |
 | `STRIPE_SECRET_KEY` | If enabled | `` | Stripe secret key (`sk_test_…` or `sk_live_…`) | Stripe Dashboard → Developers → API keys |
 | `STRIPE_WEBHOOK_SECRET` | If enabled | `` | Stripe webhook signing secret (`whsec_…`) | `stripe listen` output or Stripe Dashboard |
+| `CORS_ALLOWED_ORIGINS` | Prod only | `http://localhost:3000,http://localhost:5173` | Comma-separated list of allowed CORS origins | Set to your Netlify URL, e.g. `https://fairtix.netlify.app` |
+| `SPRING_PROFILES_ACTIVE` | Prod only | `` | Active Spring profile | Set to `prod` in production to disable payment simulation and enforce secure cookies |
 
 ### Frontend (`frontend/webpages/.env`)
 
@@ -118,6 +120,77 @@ Then re-run `docker compose up --build` to re-apply the fixed migration.
 - **Stripe keys**: `sk_live_` keys must never be committed. `.env` is in `.gitignore` — verify this before pushing. Only `.env.example` (with placeholders) is tracked.
 - **reCAPTCHA keys**: Site keys are domain-scoped. A key registered for `localhost` will not work on your production domain and vice versa. Register separate keys per environment.
 - **`STRIPE_WEBHOOK_SECRET`**: Leaving this blank with `STRIPE_ENABLED=true` causes all webhook deliveries to return 400 (signature verification fails). The backend logs a warning at startup if this is the case.
+
+---
+
+## Deploying to Netlify + Railway (Recommended for Course Demo)
+
+This is the fastest path to a publicly reachable deployment using free-tier platforms.
+
+### Architecture
+
+```
+Browser → Netlify (static frontend) → Railway (Spring Boot API)
+                                            ├── Railway PostgreSQL
+                                            └── Railway Redis
+```
+
+### Step 1 — Deploy the Backend to Railway
+
+1. Create a free account at [railway.app](https://railway.app) and start a new project.
+2. Click **Deploy from GitHub repo** → select this repository → set the **Root Directory** to `backend/`.
+3. Railway detects the `Dockerfile` automatically and builds it.
+4. Add a **PostgreSQL** plugin and a **Redis** plugin from the Railway dashboard. Railway injects connection variables automatically.
+5. In the Railway service's **Variables** tab, add all required backend environment variables from the table above. At minimum:
+   - `JWT_SECRET` (generate: `python3 -c "import secrets; print(secrets.token_hex(48))"`)
+   - `SPRING_PROFILES_ACTIVE=prod`
+   - `CORS_ALLOWED_ORIGINS=https://<your-netlify-subdomain>.netlify.app`
+   - `APP_BASE_URL=https://<your-netlify-subdomain>.netlify.app`
+   - `MAIL_HOST`, `MAIL_PORT`, `MAIL_AUTH`, `MAIL_STARTTLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` (use a free SMTP provider such as Brevo/Sendinblue or Gmail App Password)
+6. Railway provides a public HTTPS URL for your backend (e.g. `https://fairtix-backend.up.railway.app`). Copy it.
+
+> **Note:** The `prod` Spring profile disables payment simulation and enforces HTTPS-only cookies. Flyway migrations run automatically on first deploy.
+
+### Step 2 — Deploy the Frontend to Netlify
+
+1. Create a free account at [netlify.com](https://netlify.com).
+2. Click **Add new site → Import an existing project** → connect your GitHub repo.
+3. Set the **Base directory** to `frontend/webpages` and **Build command** to `npm run build` and **Publish directory** to `build`.
+4. In **Site configuration → Environment variables**, add:
+   - `REACT_APP_API_URL=https://<your-railway-backend-url>`
+5. Add a `_redirects` file for SPA routing (already committed at `frontend/webpages/public/_redirects`):
+   ```
+   /* /index.html 200
+   ```
+6. Deploy. Netlify gives you a URL like `https://fairtix.netlify.app`.
+
+### Step 3 — Update Railway CORS
+
+Go back to Railway and update `CORS_ALLOWED_ORIGINS` to match your actual Netlify URL, then redeploy the backend.
+
+### Step 4 — Load Seed Data
+
+```bash
+# Get a shell on the Railway Postgres instance via Railway CLI:
+railway run psql $DATABASE_URL < seed_test_events.sql
+
+# OR connect directly with psql using the DATABASE_URL from Railway's Variables tab
+psql "<RAILWAY_DATABASE_URL>" < seed_test_events.sql
+```
+
+Then create your admin user:
+```bash
+psql "<RAILWAY_DATABASE_URL>" -c "UPDATE users SET role = 'ADMIN' WHERE email = 'your@email.com';"
+```
+
+### Step 5 — Verify
+
+```bash
+curl https://<your-railway-url>/actuator/health
+# Expected: {"status":"UP"}
+```
+
+Open your Netlify URL in a browser, log in, and complete a purchase end-to-end.
 
 ---
 

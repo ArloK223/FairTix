@@ -39,6 +39,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,7 @@ public class OrderService {
       UserRepository userRepository,
       TicketService ticketService,
       TicketRepository ticketRepository,
-      PaymentSimulationService paymentSimulationService,
+      Optional<PaymentSimulationService> paymentSimulationService,
       StripePaymentService stripePaymentService,
       QueueService queueService,
       AuditService auditService,
@@ -82,7 +83,7 @@ public class OrderService {
     this.userRepository = userRepository;
     this.ticketService = ticketService;
     this.ticketRepository = ticketRepository;
-    this.paymentSimulationService = paymentSimulationService;
+    this.paymentSimulationService = paymentSimulationService.orElse(null);
     this.stripePaymentService = stripePaymentService;
     this.queueService = queueService;
     this.auditService = auditService;
@@ -174,6 +175,9 @@ public class OrderService {
     order = orderRepository.save(order);
 
     // Process simulated payment
+    if (paymentSimulationService == null) {
+      throw new IllegalStateException("Payment simulation is not available in this environment");
+    }
     PaymentRecord payment = paymentSimulationService.processPayment(
         order.getId(), userId, totalAmount, "USD", simulatedOutcome);
 
