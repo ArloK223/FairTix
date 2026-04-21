@@ -3,22 +3,33 @@ package com.fairtix.auth.application;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fairtix.audit.application.AuditService;
+import com.fairtix.notifications.application.NotificationPreferenceService;
 import com.fairtix.users.domain.User;
 import com.fairtix.users.dto.LoginRequest;
 import com.fairtix.users.dto.RegisterRequest;
 import com.fairtix.users.infrastructure.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
 
+  private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final LoginAttemptService loginAttemptService;
+  private final RecaptchaService recaptchaService;
+  private final NotificationPreferenceService notificationPreferenceService;
+  private final EmailVerificationService emailVerificationService;
+  private final AuditService auditService;
 
   private static final Pattern UPPERCASE = Pattern.compile("[A-Z]");
   private static final Pattern LOWERCASE = Pattern.compile("[a-z]");
@@ -29,13 +40,22 @@ public class AuthService {
   public AuthService(UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       JwtService jwtService,
-      LoginAttemptService loginAttemptService) {
+      LoginAttemptService loginAttemptService,
+      RecaptchaService recaptchaService,
+      NotificationPreferenceService notificationPreferenceService,
+      EmailVerificationService emailVerificationService,
+      AuditService auditService) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.loginAttemptService = loginAttemptService;
+    this.recaptchaService = recaptchaService;
+    this.notificationPreferenceService = notificationPreferenceService;
+    this.emailVerificationService = emailVerificationService;
+    this.auditService = auditService;
   }
 
+  @Transactional
   public String register(RegisterRequest request) {
     validatePasswordStrength(request.password());
 
@@ -48,6 +68,15 @@ public class AuthService {
     user.setPassword(passwordEncoder.encode(request.password()));
 
     userRepository.save(user);
+    notificationPreferenceService.createDefault(user.getId());
+    auditService.log(user.getId(), "USER_REGISTERED", "USER", user.getId(), null);
+
+    try {
+      emailVerificationService.sendVerificationEmail(user);
+    } catch (Exception e) {
+      log.error("Failed to send verification email to={} error={}", user.getEmail(), e.getMessage());
+      // Don't fail registration if email delivery fails
+    }
 
     return jwtService.generateToken(
         user.getId(),
@@ -56,22 +85,30 @@ public class AuthService {
   }
 
   public String login(LoginRequest request) {
+    String email = request.email();
+
     // Check lockout before anything else
-    if (loginAttemptService.isLocked(request.email())) {
-      long remaining = loginAttemptService.getRemainingLockoutSeconds(request.email());
-      throw new AccountLockedException(remaining);
+    if (loginAttemptService.isLocked(email)) {
+      throw new AccountLockedException(loginAttemptService.getRemainingLockoutSeconds(email));
     }
 
-    User user = userRepository.findByEmail(request.email()).orElse(null);
+    // After 3 failures, captcha is required; validate before password check
+    long failedAttempts = loginAttemptService.getAttemptCount(email);
+    if (recaptchaService.isCaptchaRequired(failedAttempts)) {
+      recaptchaService.assertValidToken(request.recaptchaToken());
+    }
+
+    User user = userRepository.findByEmail(email).orElse(null);
 
     if (user == null || user.isDeleted()
         || !passwordEncoder.matches(request.password(), user.getPassword())) {
-      loginAttemptService.recordFailure(request.email());
+      loginAttemptService.recordFailure(email);
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
     }
 
     // Successful login — reset attempts
-    loginAttemptService.resetAttempts(request.email());
+    loginAttemptService.resetAttempts(email);
+    auditService.log(user.getId(), "USER_LOGIN", "USER", user.getId(), null);
 
     return jwtService.generateToken(
         user.getId(),

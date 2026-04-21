@@ -5,6 +5,8 @@ import com.fairtix.events.application.EventService;
 import com.fairtix.events.domain.Event;
 import com.fairtix.events.dto.UpdateEventRequest;
 import com.fairtix.events.infrastructure.EventRepository;
+import com.fairtix.venues.domain.Venue;
+import com.fairtix.venues.infrastructure.VenueRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,14 +33,19 @@ class EventServiceTest {
   @Autowired
   private EventRepository eventRepository;
 
+  @Autowired
+  private VenueRepository venueRepository;
+
   private Event testEvent;
+  private Venue testVenue;
 
   @BeforeEach
   void setUp() {
+    testVenue = venueRepository.save(new Venue("Test Venue", null, null, null, null));
     testEvent = eventRepository.save(
         new Event(
             "Test Event",
-            "Test Venue",
+            testVenue,
             Instant.now().plusSeconds(3600),
             null));
   }
@@ -49,17 +56,17 @@ class EventServiceTest {
 
   @Test
   void creatingEventSucceeds() {
+    Venue venue = venueRepository.save(new Venue("New Venue", null, null, null, null));
 
     Event event = eventService.createEvent(
         "New Event",
         Instant.now().plusSeconds(7200),
-        "New Venue",
-        "https://cdn.example.com/new-event.jpg");
+        venue.getId(),
+        null, false, null, null);
 
     assertThat(event.getId()).isNotNull();
     assertThat(event.getTitle()).isEqualTo("New Event");
-    assertThat(event.getVenue()).isEqualTo("New Venue");
-    assertThat(event.getThumbnail()).isEqualTo("https://cdn.example.com/new-event.jpg");
+    assertThat(event.getVenue().getName()).isEqualTo("New Venue");
   }
 
   // -------------------------------------------------------------------------
@@ -95,7 +102,7 @@ class EventServiceTest {
     Instant newStart = Instant.now().plusSeconds(7200);
     String newThumbnail = "https://cdn.example.com/updated-event.jpg";
 
-    UpdateEventRequest request = new UpdateEventRequest("Updated Event", newStart, newThumbnail);
+    UpdateEventRequest request = new UpdateEventRequest("Updated Event", newStart, newThumbnail, null, null, null);
 
     Event updated = eventService.update(testEvent.getId(), request, null);
 
@@ -107,7 +114,7 @@ class EventServiceTest {
   @Test
   void updatingNonexistentEventThrowsException() {
 
-    UpdateEventRequest request = new UpdateEventRequest("Updated", Instant.now());
+    UpdateEventRequest request = new UpdateEventRequest("Updated", Instant.now(), null, null, null);
 
     assertThatThrownBy(() -> eventService.update(UUID.randomUUID(), request, null))
         .isInstanceOf(ResourceNotFoundException.class)
@@ -145,18 +152,21 @@ class EventServiceTest {
   @Test
   void searchingByVenueReturnsMatchingEvents() {
 
+    Venue anotherVenue = venueRepository.save(new Venue("Another Venue", null, null, null, null));
     eventRepository.save(
-        new Event("Another Event", "Another Venue",
+        new Event("Another Event", anotherVenue,
             Instant.now().plusSeconds(3600), null));
 
     Page<Event> results = eventService.search(
         "Test Venue",
         null,
         true,
+        null,
+        false,
         PageRequest.of(0, 10));
 
     assertThat(results.getContent())
-        .extracting(Event::getVenue)
+        .extracting(e -> e.getVenue().getName())
         .allMatch(v -> v.toLowerCase().contains("test venue"));
   }
 
@@ -167,6 +177,8 @@ class EventServiceTest {
         null,
         "Test",
         true,
+        null,
+        false,
         PageRequest.of(0, 10));
 
     assertThat(results.getContent())
@@ -178,13 +190,15 @@ class EventServiceTest {
   void searchingUpcomingFiltersPastEvents() {
 
     eventRepository.save(
-        new Event("Past Event", "Test Venue",
+        new Event("Past Event", testVenue,
             Instant.now().minusSeconds(3600), null));
 
     Page<Event> results = eventService.search(
         null,
         null,
         true,
+        null,
+        false,
         PageRequest.of(0, 10));
 
     assertThat(results.getContent())
@@ -195,13 +209,15 @@ class EventServiceTest {
   void searchingWithUpcomingFalseReturnsPastEventsToo() {
 
     eventRepository.save(
-        new Event("Past Event", "Test Venue",
+        new Event("Past Event", testVenue,
             Instant.now().minusSeconds(3600), null));
 
     Page<Event> results = eventService.search(
         null,
         null,
         false,
+        null,
+        true,
         PageRequest.of(0, 10));
 
     assertThat(results.getContent()).isNotEmpty();

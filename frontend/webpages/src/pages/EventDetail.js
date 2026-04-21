@@ -2,8 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import api from '../api/client';
+import WaitingRoom from '../components/WaitingRoom';
+import SeatMap from '../components/SeatMap';
 import '../styles/EventDetail.css';
 
+const POLL_INTERVAL_MS = 10000;
 const MAX_SEATS_PER_HOLD = 10;
 
 function groupSeatsBySection(seats) {
@@ -39,8 +42,18 @@ function EventDetail() {
   const [selectedSeatIds, setSelectedSeatIds] = useState(new Set());
   const [selectionError, setSelectionError] = useState('');
   const [holdDuration, setHoldDuration] = useState(10);
+  const [ownedTicketCount, setOwnedTicketCount] = useState(0);
+
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
 
   const prevSeatsRef = useRef([]);
+
+  // Queue state
+  const [queueStatus, setQueueStatus] = useState(null); // null | 'WAITING' | 'ADMITTED' | 'EXPIRED'
+  const [joiningQueue, setJoiningQueue] = useState(false);
+  const [queueError, setQueueError] = useState('');
+  const [admissionExpiresAt, setAdmissionExpiresAt] = useState(null);
+  const [admissionCountdown, setAdmissionCountdown] = useState('');
 
   function toggleSeat(seatId) {
     setSelectionError('');
@@ -51,6 +64,11 @@ function EventDetail() {
       } else {
         if (next.size >= MAX_SEATS_PER_HOLD) {
           setSelectionError(`You can select up to ${MAX_SEATS_PER_HOLD} seats per hold.`);
+          return prev;
+        }
+        const cap = event && event.maxTicketsPerUser;
+        if (cap != null && ownedTicketCount + next.size + 1 > cap) {
+          setSelectionError(`You have reached the purchase limit of ${cap} ticket(s) for this event.`);
           return prev;
         }
         next.add(seatId);
@@ -132,6 +150,40 @@ function EventDetail() {
         api.get(`/api/events/${eventId}/seats`),
       ]);
       setEvent(eventData);
+      if (user && eventData.maxTicketsPerUser != null) {
+        try {
+          const myTickets = await api.get('/api/tickets');
+          const count = (myTickets || []).filter(
+            (t) => String(t.eventId).toLowerCase() === String(eventId).toLowerCase() && t.status !== 'CANCELLED'
+          ).length;
+          setOwnedTicketCount(count);
+        } catch (_) {
+          // non-critical
+        }
+      }
+      // Reset queue state if event doesn't require queue
+      if (!eventData.queueRequired) {
+        setQueueStatus(null);
+        setQueueError('');
+        setAdmissionExpiresAt(null);
+      }
+      // Fetch queue status if event requires queue and user is logged in
+      if (eventData.queueRequired && user) {
+        try {
+          const qs = await api.get(`/api/events/${eventId}/queue/status`);
+          setQueueStatus(qs.status);
+          if (qs.status === 'ADMITTED') {
+            setAdmissionExpiresAt(qs.expiresAt);
+          }
+        } catch (qErr) {
+          // 404 means user hasn't joined yet
+          if (qErr.status !== 404) {
+            setQueueError(qErr.message || 'Failed to check queue status.');
+          } else {
+            setQueueStatus(null);
+          }
+        }
+      }
       const newSeats = seatsData || [];
 
       if (prevSeatsRef.current.length > 0) {
@@ -156,12 +208,55 @@ function EventDetail() {
     } finally {
       setLoading(false);
     }
-  }, [eventId]);
+  }, [eventId, user]);
 
   useEffect(() => {
     setLoading(true);
+    setQueueStatus(null);
+    setQueueError('');
+    setAdmissionExpiresAt(null);
+    setAdmissionCountdown('');
     fetchData();
   }, [fetchData]);
+
+  // Auto-poll seat availability every 10 seconds (only when tab is visible)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        fetchData();
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
+  // Countdown timer for admission window
+  useEffect(() => {
+    if (!admissionExpiresAt) return;
+    const tick = () => {
+      const diff = Math.max(0, new Date(admissionExpiresAt) - Date.now());
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setAdmissionCountdown(`${mins}:${secs.toString().padStart(2, '0')}`);
+      if (diff === 0) setQueueStatus('EXPIRED');
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [admissionExpiresAt]);
+
+  async function handleJoinQueue() {
+    if (joiningQueue) return;
+    setJoiningQueue(true);
+    setQueueError('');
+    try {
+      await api.post(`/api/events/${eventId}/queue/join`);
+      setQueueStatus('WAITING');
+    } catch (err) {
+      setQueueError(err.message || 'Failed to join queue.');
+    } finally {
+      setJoiningQueue(false);
+    }
+  }
 
   if (loading) return (
     <div className="event-detail">
@@ -200,12 +295,128 @@ function EventDetail() {
         )}
         <h2>{event.title}</h2>
         <div className="event-detail-meta">
-          <span>{event.venue}</span>
+          <span>{event.venue?.name ?? ''}</span>
           <span>{new Date(event.startTime).toLocaleString()}</span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      {/* Status banners */}
+      {event.status === 'PUBLISHED' && (
+        <div className="event-status-banner event-status-banner--announced">
+          Tickets are not yet on sale. Stay tuned — this event has been announced.
+        </div>
+      )}
+      {event.status === 'CANCELLED' && (
+        <div className="event-status-banner event-status-banner--cancelled">
+          This event has been cancelled.
+          {event.cancellationReason && (
+            <span> Reason: {event.cancellationReason}</span>
+          )}
+        </div>
+      )}
+      {event.status === 'COMPLETED' && (
+        <div className="event-status-banner event-status-banner--completed">
+          This event has already taken place. Ticket sales are closed.
+        </div>
+      )}
+      {event.status === 'ARCHIVED' && (
+        <div className="event-status-banner event-status-banner--completed">
+          This event has been archived.
+        </div>
+      )}
+
+      {/* Queue section for queue-required events */}
+      {event.queueRequired && user && queueStatus === null && (
+        <div className="queue-join-section">
+          {event.maxTicketsPerUser != null && ownedTicketCount >= event.maxTicketsPerUser ? (
+            <p className="queue-join-message">You have reached the purchase limit for this event and cannot rejoin the queue.</p>
+          ) : (
+            <>
+              <p className="queue-join-message">This event requires queue admission before you can hold seats.</p>
+              {queueError && <div className="queue-error">{queueError}</div>}
+              <button className="queue-join-btn" onClick={handleJoinQueue} disabled={joiningQueue}>
+                {joiningQueue ? 'Joining...' : 'Join Queue'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {event.queueRequired && user && queueStatus === 'WAITING' && (
+        <WaitingRoom
+          eventId={eventId}
+          onAdmitted={(expiresAt) => { setQueueStatus('ADMITTED'); setAdmissionExpiresAt(expiresAt); }}
+          onLeft={() => setQueueStatus(null)}
+        />
+      )}
+
+      {event.queueRequired && user && queueStatus === 'ADMITTED' && (
+        <div className="queue-admitted-banner">
+          {event.maxTicketsPerUser != null && ownedTicketCount >= event.maxTicketsPerUser ? (
+            'You have already purchased the maximum number of tickets for this event.'
+          ) : summary.AVAILABLE > 0 ? (
+            <>
+              You're admitted! Select your seats before your window closes.
+              {admissionCountdown && <span className="queue-countdown"> Time remaining: {admissionCountdown}</span>}
+            </>
+          ) : (
+            'All seats are sold out. No seats are available to select during your admission window.'
+          )}
+        </div>
+      )}
+
+      {event.queueRequired && user && queueStatus === 'EXPIRED' && (
+        <div className="queue-join-section">
+          {event.maxTicketsPerUser != null && ownedTicketCount >= event.maxTicketsPerUser ? (
+            <p className="queue-join-message">You have reached the purchase limit for this event and cannot rejoin the queue.</p>
+          ) : (
+            <>
+              <p className="queue-join-message">Your admission window expired. You can rejoin the queue.</p>
+              {queueError && <div className="queue-error">{queueError}</div>}
+              <button className="queue-join-btn" onClick={handleJoinQueue} disabled={joiningQueue}>
+                {joiningQueue ? 'Rejoining...' : 'Rejoin Queue'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {event.queueRequired && user && queueStatus === 'COMPLETED' && (
+        <div className="queue-admitted-banner">
+          You've already reserved a seat for this event.{' '}
+          <Link to="/my-holds">Complete your purchase in My Holds.</Link>
+          {(event.maxTicketsPerUser == null || ownedTicketCount < event.maxTicketsPerUser) && (
+            <span style={{ marginLeft: '1rem', fontSize: '0.85em' }}>
+              Released your hold?{' '}
+              <button
+                className="queue-join-btn"
+                style={{ display: 'inline', padding: '0.2rem 0.6rem', fontSize: '0.85em' }}
+                onClick={async () => {
+                  setQueueStatus(null);
+                  await handleJoinQueue();
+                }}
+                disabled={joiningQueue}
+              >
+                {joiningQueue ? 'Rejoining...' : 'Rejoin Queue'}
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+
+      {event.queueRequired && !user && event.status === 'ACTIVE' && (
+        <div className="login-prompt">
+          <Link to="/login">Log in</Link> to join the queue for this event.
+        </div>
+      )}
+
+      {user && event.maxTicketsPerUser != null && event.status === 'ACTIVE' && (
+        <div className="purchase-cap-notice">
+          Purchase limit: {ownedTicketCount} / {event.maxTicketsPerUser} ticket(s) used for this event.
+        </div>
+      )}
+
+      {event.status === 'ACTIVE' && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div className="seat-summary">
           <span className="seat-summary-chip total">{seats.length} total</span>
           {summary.AVAILABLE > 0 && (
@@ -221,89 +432,125 @@ function EventDetail() {
             <span className="seat-summary-chip sold">{summary.SOLD} sold</span>
           )}
         </div>
-        <button className="event-detail-refresh" onClick={fetchData}>Refresh</button>
-      </div>
-
-      {seats.length === 0 ? (
-        <div className="seats-empty">
-          <p>No seats listed for this event yet.</p>
-        </div>
-      ) : (
-        Object.entries(sectionGroups).map(([section, sectionSeats]) => (
-          <div key={section} className="seat-section-group">
-            <h3>{section}{(() => {
-              const prices = sectionSeats.map(s => s.price ?? 0);
-              const min = Math.min(...prices);
-              const max = Math.max(...prices);
-              return min === max
-                ? ` \u2014 $${min.toFixed(2)}`
-                : ` \u2014 from $${min.toFixed(2)} to $${max.toFixed(2)}`;
-            })()}</h3>
-            <table className="seats-table">
-              <thead>
-                <tr>
-                  <th>Row</th>
-                  <th>Seat</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sectionSeats.map((seat) => {
-                  const isAvailable = seat.status === 'AVAILABLE';
-                  const isSelected = selectedSeatIds.has(seat.id);
-                  const canSelect = user && isAvailable;
-                  return (
-                    <tr
-                      key={seat.id}
-                      className={[
-                        canSelect ? 'seat-row-selectable' : '',
-                        isSelected ? 'seat-row-selected' : '',
-                      ].join(' ')}
-                      onClick={canSelect ? () => toggleSeat(seat.id) : undefined}
-                      role={canSelect ? 'button' : undefined}
-                      tabIndex={canSelect ? 0 : -1}
-                      onKeyDown={
-                        canSelect
-                          ? (e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                toggleSeat(seat.id);
-                              }
-                            }
-                          : undefined
-                      }
-                    >
-                      <td>{seat.rowLabel}</td>
-                      <td>{seat.seatNumber}</td>
-                      <td>${(seat.price ?? 0).toFixed(2)}</td>
-                      <td>
-                        <span className={`seat-status ${seat.status.toLowerCase()}`}>
-                          {isSelected ? 'SELECTED' : seat.status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn${viewMode === 'list' ? ' active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+            <button
+              className={`view-toggle-btn${viewMode === 'map' ? ' active' : ''}`}
+              onClick={() => setViewMode('map')}
+            >
+              Map
+            </button>
           </div>
-        ))
-      )}
-
-      {seats.length > 0 && (!summary.AVAILABLE || summary.AVAILABLE === 0) && (
-        <div className="seats-all-taken">
-          <p>All seats are currently held or sold. Check back later or refresh to see updates.</p>
+          <button className="event-detail-refresh" onClick={fetchData}>Refresh</button>
         </div>
+      </div>}
+
+      {event.status === 'ACTIVE' && (
+        event.queueRequired && user && queueStatus === 'WAITING' ? null : seats.length === 0 ? (
+          <div className="seats-empty">
+            <p>No seats listed for this event yet.</p>
+          </div>
+        ) : viewMode === 'map' ? (
+          <>
+            <SeatMap
+              seats={seats}
+              selectedSeatIds={selectedSeatIds}
+              onToggleSeat={toggleSeat}
+              canSelect={user && !(event.queueRequired && queueStatus !== 'ADMITTED') && !(event.maxTicketsPerUser != null && ownedTicketCount >= event.maxTicketsPerUser)}
+            />
+            {!user && (
+              <div className="login-prompt">
+                <Link to="/login">Log in</Link> to hold seats.
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {Object.entries(sectionGroups).map(([section, sectionSeats]) => (
+              <div key={section} className="seat-section-group">
+                <h3>{section}{(() => {
+                  const prices = sectionSeats.map(s => s.price ?? 0);
+                  const min = Math.min(...prices);
+                  const max = Math.max(...prices);
+                  return min === max
+                    ? ` \u2014 $${min.toFixed(2)}`
+                    : ` \u2014 from $${min.toFixed(2)} to $${max.toFixed(2)}`;
+                })()}</h3>
+                <table className="seats-table">
+                  <thead>
+                    <tr>
+                      <th>Row</th>
+                      <th>Seat</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sectionSeats.map((seat) => {
+                      const isAvailable = seat.status === 'AVAILABLE';
+                      const isSelected = selectedSeatIds.has(seat.id);
+                      const queueGated = event.queueRequired && queueStatus !== 'ADMITTED';
+                      const atCap = event.maxTicketsPerUser != null && ownedTicketCount >= event.maxTicketsPerUser;
+                      const canSelect = user && isAvailable && !queueGated && !atCap;
+                      return (
+                        <tr
+                          key={seat.id}
+                          className={[
+                            canSelect ? 'seat-row-selectable' : '',
+                            isSelected ? 'seat-row-selected' : '',
+                          ].join(' ')}
+                          onClick={canSelect ? () => toggleSeat(seat.id) : undefined}
+                          role={canSelect ? 'button' : undefined}
+                          tabIndex={canSelect ? 0 : -1}
+                          onKeyDown={
+                            canSelect
+                              ? (e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    toggleSeat(seat.id);
+                                  }
+                                }
+                              : undefined
+                          }
+                        >
+                          <td>{seat.rowLabel}</td>
+                          <td>{seat.seatNumber}</td>
+                          <td>${seat.price != null ? Number(seat.price).toFixed(2) : '—'}</td>
+                          <td>
+                            <span className={`seat-status ${seat.status.toLowerCase()}`}>
+                              {isSelected ? 'SELECTED' : seat.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+
+            {seats.length > 0 && (!summary.AVAILABLE || summary.AVAILABLE === 0) && (
+              <div className="seats-all-taken">
+                <p>All seats are currently held or sold. Check back later or refresh to see updates.</p>
+              </div>
+            )}
+
+            {!user && seats.length > 0 && (
+              <div className="login-prompt">
+                <Link to="/login">Log in</Link> to hold seats.
+              </div>
+            )}
+          </>
+        )
       )}
 
-      {!user && seats.length > 0 && (
-        <div className="login-prompt">
-          <Link to="/login">Log in</Link> to hold seats.
-        </div>
-      )}
-
-      {holdMessage && (
+      {event.status === 'ACTIVE' && holdMessage && (
         <div className={`hold-message ${holdMessage.type}`}>
           {holdMessage.text}
           {holdMessage.type === 'success' && createdHoldIds.length > 0 && (
@@ -321,11 +568,11 @@ function EventDetail() {
         </div>
       )}
 
-      {selectionError && (
+      {event.status === 'ACTIVE' && selectionError && (
         <div className="selection-error">{selectionError}</div>
       )}
 
-      {selectedSeatIds.size > 0 && (
+      {event.status === 'ACTIVE' && selectedSeatIds.size > 0 && (
         <div className="selection-bar">
           <span>{selectedSeatIds.size} seat{selectedSeatIds.size > 1 ? 's' : ''} selected</span>
           <div className="selection-bar-actions">

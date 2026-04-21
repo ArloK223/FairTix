@@ -5,10 +5,17 @@ import com.fairtix.inventory.application.DuplicateSeatException;
 import com.fairtix.inventory.application.SeatHoldConflictException;
 import com.fairtix.inventory.application.SeatHoldNotFoundException;
 import com.fairtix.orders.application.OrderNotFoundException;
+import com.fairtix.orders.application.PurchaseCapExceededException;
 import com.fairtix.auth.application.AccountLockedException;
+import com.fairtix.auth.application.CaptchaRequiredException;
+import com.fairtix.auth.application.InvalidCaptchaException;
+import com.fairtix.auth.application.RecaptchaUnavailableException;
 import com.fairtix.auth.application.WeakPasswordException;
 import com.fairtix.payments.api.PaymentProcessingException;
 import com.fairtix.payments.application.PaymentFailedException;
+import com.fairtix.queue.application.QueueConflictException;
+import com.fairtix.refunds.application.RefundNotEligibleException;
+import com.fairtix.support.application.SupportTicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +62,12 @@ public class GlobalExceptionHandler {
     return error(HttpStatus.CONFLICT, "HOLD_CONFLICT", ex.getMessage(), req);
   }
 
+  @ExceptionHandler(QueueConflictException.class)
+  public ResponseEntity<Map<String, Object>> handleQueueConflict(
+      QueueConflictException ex, HttpServletRequest req) {
+    return error(HttpStatus.CONFLICT, "QUEUE_CONFLICT", ex.getMessage(), req);
+  }
+
   @ExceptionHandler(DuplicateSeatException.class)
   public ResponseEntity<Map<String, Object>> handleDuplicateSeat(
       DuplicateSeatException ex, HttpServletRequest req) {
@@ -65,6 +78,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, Object>> handleBadRequest(
       IllegalArgumentException ex, HttpServletRequest req) {
     return error(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), req);
+  }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<Map<String, Object>> handleInvalidStateTransition(
+      IllegalStateException ex, HttpServletRequest req) {
+    return error(HttpStatus.CONFLICT, "INVALID_STATE_TRANSITION", ex.getMessage(), req);
   }
 
   /**
@@ -104,10 +123,22 @@ public class GlobalExceptionHandler {
     return error(HttpStatus.FORBIDDEN, "FORBIDDEN", "Access denied", req);
   }
 
+  @ExceptionHandler(PurchaseCapExceededException.class)
+  public ResponseEntity<Map<String, Object>> handlePurchaseCap(
+      PurchaseCapExceededException ex, HttpServletRequest req) {
+    return error(HttpStatus.CONFLICT, "PURCHASE_CAP_EXCEEDED", ex.getMessage(), req);
+  }
+
   @ExceptionHandler(OrderNotFoundException.class)
   public ResponseEntity<Map<String, Object>> handleOrderNotFound(
       OrderNotFoundException ex, HttpServletRequest req) {
     return error(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", ex.getMessage(), req);
+  }
+
+  @ExceptionHandler(SupportTicketNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> handleSupportTicketNotFound(
+      SupportTicketNotFoundException ex, HttpServletRequest req) {
+    return error(HttpStatus.NOT_FOUND, "SUPPORT_TICKET_NOT_FOUND", ex.getMessage(), req);
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)
@@ -129,6 +160,24 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
   }
 
+  @ExceptionHandler(CaptchaRequiredException.class)
+  public ResponseEntity<Map<String, Object>> handleCaptchaRequired(
+      CaptchaRequiredException ex, HttpServletRequest req) {
+    return error(HttpStatus.UNPROCESSABLE_ENTITY, "CAPTCHA_REQUIRED", ex.getMessage(), req);
+  }
+
+  @ExceptionHandler(InvalidCaptchaException.class)
+  public ResponseEntity<Map<String, Object>> handleInvalidCaptcha(
+      InvalidCaptchaException ex, HttpServletRequest req) {
+    return error(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_CAPTCHA", ex.getMessage(), req);
+  }
+
+  @ExceptionHandler(RecaptchaUnavailableException.class)
+  public ResponseEntity<Map<String, Object>> handleRecaptchaUnavailable(
+      RecaptchaUnavailableException ex, HttpServletRequest req) {
+    return error(HttpStatus.SERVICE_UNAVAILABLE, "CAPTCHA_UNAVAILABLE", ex.getMessage(), req);
+  }
+
   @ExceptionHandler(WeakPasswordException.class)
   public ResponseEntity<Map<String, Object>> handleWeakPassword(
       WeakPasswordException ex, HttpServletRequest req) {
@@ -139,6 +188,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Object> handlePaymentProcessing(
       PaymentProcessingException ex, HttpServletRequest req) {
     return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(ex.getPaymentResponse());
+  }
+
+  @ExceptionHandler(RefundNotEligibleException.class)
+  public ResponseEntity<Map<String, Object>> handleRefundNotEligible(
+      RefundNotEligibleException ex, HttpServletRequest req) {
+    return error(HttpStatus.UNPROCESSABLE_ENTITY, "REFUND_NOT_ELIGIBLE", ex.getMessage(), req);
   }
 
   @ExceptionHandler(PaymentFailedException.class)

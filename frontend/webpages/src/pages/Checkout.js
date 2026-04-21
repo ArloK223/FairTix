@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import { useAuth } from '../auth/useAuth';
 import '../styles/Checkout.css';
 
 function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [holds, setHolds] = useState([]);
   const [seatMap, setSeatMap] = useState({});
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,7 @@ function Checkout() {
   const [paymentState, setPaymentState] = useState('form'); // form | processing | success | failed
   const [tick, setTick] = useState(0);
   const tickRef = useRef(null);
+  const holdIdsRef = useRef(location.state?.holdIds || []);
 
   // Countdown timer for hold expiration
   useEffect(() => {
@@ -29,7 +32,7 @@ function Checkout() {
   }, [holds.length, paymentState]);
 
   const fetchConfirmedHolds = useCallback(async () => {
-    const passedHoldIds = location.state?.holdIds || [];
+    const passedHoldIds = holdIdsRef.current;
     setError('');
     try {
       let confirmedHolds;
@@ -74,7 +77,7 @@ function Checkout() {
     } finally {
       setLoading(false);
     }
-  }, [location.state]);
+  }, []);
 
   useEffect(() => {
     fetchConfirmedHolds();
@@ -154,6 +157,20 @@ function Checkout() {
     setCardNumber('');
   }
 
+  if (user && user.emailVerified === false) {
+    return (
+      <div className="checkout">
+        <div className="checkout-error-page">
+          <h2>Email verification required</h2>
+          <p>You need to verify your email address before purchasing tickets.</p>
+          <p>Check your inbox for the verification link, or{' '}
+            <Link to="/dashboard">go to your dashboard</Link> to resend it.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) return <div className="loading">Loading checkout...</div>;
 
   if (orderResult) {
@@ -163,6 +180,39 @@ function Checkout() {
           <h2>Order Confirmed!</h2>
           <p>Your payment was successful and tickets have been issued.</p>
           <p className="checkout-order-id">Order ID: {orderResult.orderId || orderResult.id}</p>
+          {holds.length > 0 && (
+            <div className="checkout-success-summary">
+              <h3>Order Summary</h3>
+              <table className="checkout-table">
+                <thead>
+                  <tr>
+                    <th>Section</th>
+                    <th>Row</th>
+                    <th>Seat</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {holds.map((hold) => {
+                    const seat = seatMap[hold.seatId];
+                    return (
+                      <tr key={hold.id}>
+                        <td>{seat ? seat.section : '—'}</td>
+                        <td>{seat ? seat.rowLabel : '—'}</td>
+                        <td>{seat ? seat.seatNumber : hold.seatId.slice(0, 8) + '...'}</td>
+                        <td>${getSeatPrice(hold).toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <div className="checkout-total">
+                <span>{holds.length} seat{holds.length > 1 ? 's' : ''}</span>
+                <span className="checkout-price">${calculateTotal().toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+          <p className="checkout-email-notice">A confirmation email has been sent to your email address.</p>
           <div className="checkout-success-actions">
             <Link to="/my-tickets" className="checkout-btn-primary">View My Tickets</Link>
             <Link to="/events" className="checkout-btn-secondary">Browse Events</Link>
@@ -174,14 +224,30 @@ function Checkout() {
 
   if (error && holds.length === 0) {
     return (
-      <div className="checkout">
-        <div className="checkout-error-page">
-          <p>{error}</p>
-          <button onClick={() => navigate('/my-holds')} className="checkout-btn-secondary">
+    <div className="checkout">
+      <div className="checkout-error-page">
+        <p>{error}</p>
+
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <button
+            onClick={() => {
+              setLoading(true);
+              fetchConfirmedHolds();
+            }}
+            className="checkout-btn-primary"
+          >
+            Retry
+          </button>
+
+          <button
+            onClick={() => navigate('/my-holds')}
+            className="checkout-btn-secondary"
+          >
             Back to My Holds
           </button>
         </div>
       </div>
+    </div>
     );
   }
 
@@ -190,12 +256,12 @@ function Checkout() {
   // Check hold expiration
   const now = Date.now();
   const expiringHolds = holds.filter((h) => {
-    if (!h.expiresAt) return false;
+    if (!h.expiresAt || h.status === 'CONFIRMED') return false;
     const remaining = new Date(h.expiresAt).getTime() - now;
     return remaining > 0 && remaining < 120000; // < 2 minutes
   });
   const expiredHolds = holds.filter((h) => {
-    if (!h.expiresAt) return false;
+    if (!h.expiresAt || h.status === 'CONFIRMED') return false;
     return new Date(h.expiresAt).getTime() <= now;
   });
 

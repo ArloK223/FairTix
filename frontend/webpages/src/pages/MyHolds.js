@@ -22,6 +22,7 @@ function MyHolds() {
   const tickRef = useRef(null);
 
   const fetchHolds = useCallback(async () => {
+    setLoading(true);
     setError('');
     try {
       const [activeData, confirmedData] = await Promise.all([
@@ -93,9 +94,6 @@ function MyHolds() {
     }
   }
 
-  if (loading) return <div className="loading">Loading holds...</div>;
-  if (error) return <div className="error-message">{error}</div>;
-
   const activeHolds = holds.filter((h) => h.status === 'ACTIVE');
   const confirmedHolds = holds.filter((h) => h.status === 'CONFIRMED');
 
@@ -103,19 +101,40 @@ function MyHolds() {
     <div className="my-holds">
       <div className="my-holds-header">
         <h2>My Holds</h2>
-        <button className="my-holds-refresh" onClick={fetchHolds}>Refresh</button>
+        <button className="my-holds-refresh" onClick={fetchHolds} disabled={loading}>Refresh</button>
       </div>
 
       {message && (
         <div className={`hold-page-message ${message.type}`}>{message.text}</div>
       )}
 
-      {holds.length === 0 ? (
+      {loading && (
+        <div className="holds-grid">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="hold-card hold-card-skeleton">
+              <div className="skeleton-line skeleton-hold-seat" />
+              <div className="skeleton-line skeleton-hold-timer" />
+              <div className="skeleton-line skeleton-hold-actions" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="holds-error">
+          <p className="error-message">{error}</p>
+          <button className="my-holds-refresh" onClick={fetchHolds}>Retry</button>
+        </div>
+      )}
+
+      {!loading && !error && holds.length === 0 && (
         <div className="holds-empty">
           <p>No active holds.</p>
           <p>Browse <Link to="/events">events</Link> and select seats to hold them.</p>
         </div>
-      ) : (
+      )}
+
+      {!loading && !error && holds.length > 0 && (
         <>
           {activeHolds.length > 0 && (
             <section>
@@ -174,6 +193,15 @@ function MyHolds() {
                             : `Seat ${hold.seatId.slice(0, 8)}...`}
                         </span>
                         <span className="hold-card-status confirmed">CONFIRMED</span>
+                      </div>
+                      <div className="hold-card-actions">
+                        <button
+                          className="hold-btn-release"
+                          disabled={!!actionLoading[hold.id]}
+                          onClick={() => handleRelease(hold.id)}
+                        >
+                          {actionLoading[hold.id] === 'release' ? 'Releasing...' : 'Release'}
+                        </button>
                       </div>
                     </div>
                   );

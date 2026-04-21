@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.fairtix.events.domain.Event;
+import com.fairtix.events.domain.EventStatus;
+import com.fairtix.venues.dto.VenueResponse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -15,7 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @param id        the unique id of the event
  * @param title     the event title
  * @param startTime the event start time in UTC (ISO-8601)
- * @param venue     the name of the venue
+ * @param venue     the venue details
  * @param thumbnail the thumbnail URL for the event
  */
 @Schema(description = "Event details")
@@ -26,26 +28,47 @@ public record EventResponse(
         String title,
         @Schema(description = "Start time in UTC", example = "2026-07-15T19:00:00Z")
         Instant startTime,
-        @Schema(description = "Venue name", example = "Madison Square Garden")
-        String venue,
+        @Schema(description = "Venue details")
+        VenueResponse venue,
         @Schema(description = "Thumbnail URL", example = "https://example.com/event-thumbnail.jpg")
         String thumbnail,
         @Schema(description = "Organizer user ID")
-        UUID organizerId) {
+        UUID organizerId,
+        @Schema(description = "Whether this event requires queue admission before seat holds")
+        boolean queueRequired,
+        @Schema(description = "Maximum queue capacity (null = unlimited)")
+        Integer queueCapacity,
+        @Schema(description = "Maximum tickets a single user may purchase for this event (null = no cap)")
+        Integer maxTicketsPerUser,
+        @Schema(description = "Lifecycle status of the event")
+        EventStatus status,
+        @Schema(description = "When the event was published (null if not yet published)")
+        Instant publishedAt,
+        @Schema(description = "When the event was cancelled (null if not cancelled)")
+        Instant cancelledAt,
+        @Schema(description = "When the event was completed (null if not completed)")
+        Instant completedAt,
+        @Schema(description = "When the event was archived (null if not archived)")
+        Instant archivedAt,
+        @Schema(description = "Reason for cancellation (null if not cancelled)")
+        String cancellationReason) {
 
-    /**
-     * Maps an {@link Event} object to an API response.
-     *
-     * @param event the event entity
-     * @return the corresponding {@link EventResponse}
-     */
     public static EventResponse from(Event event) {
         return new EventResponse(
                 event.getId(),
                 event.getTitle(),
                 event.getStartTime(),
-                event.getVenue(),
+                event.getVenue() != null ? VenueResponse.from(event.getVenue()) : null,
                 event.getThumbnail(),
-                event.getOrganizerId());
+                event.getOrganizerId(),
+                event.isQueueRequired(),
+                event.getQueueCapacity(),
+                event.getMaxTicketsPerUser(),
+                event.getStatus(),
+                event.getPublishedAt(),
+                event.getCancelledAt(),
+                event.getCompletedAt(),
+                event.getArchivedAt(),
+                event.getCancellationReason());
     }
 }
