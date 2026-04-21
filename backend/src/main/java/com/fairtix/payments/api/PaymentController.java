@@ -84,7 +84,8 @@ public class PaymentController {
     BigDecimal total = request.holdIds().stream()
         .map(id -> seatHoldRepository.findByIdAndOwnerId(id, principal.getUserId())
             .map(h -> h.getSeat().getPrice())
-            .orElse(BigDecimal.ZERO))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Hold not found or not owned by current user: " + id)))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     long amountCents = total.multiply(BigDecimal.valueOf(100)).longValue();
@@ -132,7 +133,8 @@ public class PaymentController {
       BigDecimal expectedTotal = request.holdIds().stream()
           .map(id -> seatHoldRepository.findByIdAndOwnerId(id, principal.getUserId())
               .map(h -> h.getSeat().getPrice())
-              .orElse(BigDecimal.ZERO))
+              .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  "Hold not found or not owned by current user: " + id)))
           .reduce(BigDecimal.ZERO, BigDecimal::add);
       long expectedAmountCents = expectedTotal.multiply(BigDecimal.valueOf(100)).longValue();
       if (!stripePaymentService.verifyPaymentSucceeded(paymentIntentId, expectedAmountCents)) {

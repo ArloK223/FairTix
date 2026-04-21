@@ -5,6 +5,7 @@ import com.fairtix.fraud.api.StepUpFilter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,9 @@ public class SecurityConfig {
       @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}") String allowedOriginsRaw) {
     this.jwtFilter = jwtFilter;
     this.stepUpFilter = stepUpFilter;
-    this.allowedOrigins = Arrays.asList(allowedOriginsRaw.split(","));
+    this.allowedOrigins = Arrays.stream(allowedOriginsRaw.split(","))
+        .map(String::trim)
+        .collect(Collectors.toList());
   }
 
   @Bean
