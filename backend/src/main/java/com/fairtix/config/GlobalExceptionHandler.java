@@ -17,6 +17,7 @@ import com.fairtix.payments.application.PaymentFailedException;
 import com.fairtix.fraud.application.UserFlaggedForAbuseException;
 import com.fairtix.queue.application.QueueConflictException;
 import com.fairtix.refunds.application.RefundNotEligibleException;
+import com.fairtix.tickets.application.TransferVelocityExceededException;
 import com.fairtix.support.application.SupportTicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -196,6 +197,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Object> handlePaymentProcessing(
       PaymentProcessingException ex, HttpServletRequest req) {
     return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(ex.getPaymentResponse());
+  }
+
+  @ExceptionHandler(TransferVelocityExceededException.class)
+  public ResponseEntity<Map<String, Object>> handleTransferVelocity(
+      TransferVelocityExceededException ex, HttpServletRequest req) {
+    return error(HttpStatus.TOO_MANY_REQUESTS, "TRANSFER_VELOCITY_EXCEEDED", ex.getMessage(), req);
   }
 
   @ExceptionHandler(RefundNotEligibleException.class)
